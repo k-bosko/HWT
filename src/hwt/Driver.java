@@ -8,6 +8,8 @@ import hwt.model.Room;
 import hwt.view.SwingPanel;
 import hwt.view.SwingView;
 import hwt.view.View;
+import input.GameInput;
+import input.KeyBoardHandler;
 import javax.swing.JPanel;
 
 public class Driver {
@@ -54,15 +56,17 @@ public class Driver {
     int start = maze.getStart();
     Room startCave = maze.getRoomBy(start);
     Player player = new Player(startCave, numArrows);
-    View view = new SwingView();
 
-    Controller c = new Controller(maze, player, view);
+    GameInput input = new KeyBoardHandler();
+    View view = new SwingView(input);
+
+    Controller c = new Controller(maze, player, view, input);
 
 //    maze.printWalls();
-    maze.printRoomsInfo();
+//    maze.printRoomsInfo();
 
-//    c.start();
-    view.paint(maze, player);
+    c.startGUI();
+//    c.startText();
 
 
   }

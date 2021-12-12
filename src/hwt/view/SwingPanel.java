@@ -1,9 +1,8 @@
 package hwt.view;
 
 import hwt.model.Direction;
-import hwt.model.PerfectMaze;
-import hwt.model.Player;
 import hwt.model.Room;
+import input.KeyBoardHandler;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -21,7 +20,7 @@ import javax.swing.JPanel;
 
 
 public class SwingPanel extends JPanel {
-  //data class to hold coordinates
+
   private class Coordinates{
     private int x;
     private int y;
@@ -59,20 +58,16 @@ public class SwingPanel extends JPanel {
 
 
   private List<Room> rooms;
-  private Room roomWithWumpus;
-  private List<Room> roomsWithBats;
-  private List<Room> roomsWithPits;
-  private Player player;
+  private Room caveWithWumpus;
+  private List<Room> cavesWithBats;
+  private List<Room> cavesWithPits;
+  private Room playerLoc;
+  private boolean initialized = false;
+  //initialized -> need to avoid calling paintComponent on uninitialized data (-> null pointer exception)
+  // bc we don't transfer data we need in constructor but with paint call
 
-  public SwingPanel(PerfectMaze maze, Player player){
+  public SwingPanel(KeyBoardHandler input){
     //load images
-    this.rooms = maze.getRooms();
-    this.roomWithWumpus = maze.getCaveWithWumpus();
-    this.roomsWithBats = maze.getCavesWithBats();
-    this.roomsWithPits = maze.getCavesWithPits();
-    this.player = player;
-
-
     try {
       this.roombase_1 = ImageIO.read(new File("./img/roombase-1.png"));
       this.roombase_3 = ImageIO.read(new File("./img/roombase-3.png"));
@@ -90,12 +85,36 @@ public class SwingPanel extends JPanel {
     } catch (IOException e) {
       System.out.println("File doesn't exist");
     }
+
+    // register the keyboard handler
+//    if (input != null) {
+      addKeyListener(input);
+
+//    }
+    this.setFocusable(true);
+
   }
+
+  public void paint(List<Room> rooms, Room caveWithWumpus,
+      List<Room> cavesWithBats, List<Room> cavesWithPits, Room playerLoc){
+    this.rooms = rooms;
+    this.caveWithWumpus = caveWithWumpus;
+    this.cavesWithBats = cavesWithBats;
+    this.cavesWithPits = cavesWithPits;
+    this.playerLoc = playerLoc;
+    this.initialized = true;
+
+  };
 
   @Override
   protected void paintComponent(Graphics g){
                                 //^^ for canvas
     super.paintComponent(g);
+
+    if (!initialized) {
+      return;
+    }
+
     Graphics2D g2d = (Graphics2D) g;
 
     //show maze room by room
@@ -117,24 +136,24 @@ public class SwingPanel extends JPanel {
       g2d.drawImage(img, t, this);
     }
 
-    for (int i = 0; i < this.roomsWithPits.size(); i++){
-      Coordinates coordPit = getCoordinates(this.roomsWithPits.get(i), 0);
+    for (int i = 0; i < this.cavesWithPits.size(); i++){
+      Coordinates coordPit = getCoordinates(this.cavesWithPits.get(i), 0);
       g2d.drawImage(this.pit, coordPit.getX(), coordPit.getY(), this);
     }
 
-    Coordinates coordWumpus = getCoordinates(this.roomWithWumpus, 0);
+    Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
     int wumpusShift = (ROOM_SIZE - WUMPUS_SIZE)/2;
     g2d.drawImage(this.wumpus, coordWumpus.getX() + wumpusShift,
         coordWumpus.getY() + wumpusShift, this);
 
-    for (int i = 0; i < this.roomsWithBats.size(); i++){
-      Coordinates coordBats = getCoordinates(this.roomsWithBats.get(i), 0);
+    for (int i = 0; i < this.cavesWithBats.size(); i++){
+      Coordinates coordBats = getCoordinates(this.cavesWithBats.get(i), 0);
       int batsShift = (ROOM_SIZE - BATS_SIZE)/2;
       g2d.drawImage(this.superbats, coordBats.getX() + wumpusShift,
           coordBats.getY() + wumpusShift, this);
     }
 
-    Coordinates coordPlayer = getCoordinates(player.getLocation(), 0);
+    Coordinates coordPlayer = getCoordinates(playerLoc, 0);
     int playerShift = (ROOM_SIZE - PLAYER_SIZE)/2;
     g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
         coordPlayer.getY() + playerShift, this);
@@ -225,5 +244,10 @@ public class SwingPanel extends JPanel {
         y += ROOM_SIZE;
     }
     return new Coordinates(x, y);
+  }
+
+  public void repaintPlayer(Room playerLoc) {
+    this.playerLoc = playerLoc;
+    repaint();
   }
 }

@@ -1,32 +1,41 @@
 package hwt.controller;
 
-
 import hwt.model.CaveType;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Direction;
 import hwt.model.Room;
 import hwt.view.View;
+import input.GameInput;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.Timer;
 
-public class Controller {
+
+public class Controller implements ActionListener {
   private final PerfectMaze maze;
   private final Player player;
   private final View view;
+  private final GameInput input;
+  private final Timer timer;
   static Pattern patternDigits = Pattern.compile("[^\\d]");
   private static boolean wumpusKilled = false;
+  private static final int PERIOD = 150;
 
-  public Controller(PerfectMaze maze, Player player, View view){
+  public Controller(PerfectMaze maze, Player player, View view, GameInput input){
     this.maze = maze;
     this.player = player;
     this.view = view;
+    this.input = input;
+    this.timer = new Timer(PERIOD /* 60 fps */, this);
   }
 
-  public void start() {
+  public void startText(){
     Room caveWithWumpus = maze.getCaveWithWumpus();
     ArrayList<Room> cavesWithPits = maze.getCavesWithPits();
 
@@ -43,6 +52,33 @@ public class Controller {
       printOptions(currentCave);
       shootOrMove(currentCave);
     }
+  }
+  public void startGUI() {
+    Room caveWithWumpus = maze.getCaveWithWumpus();
+    ArrayList<Room> cavesWithPits = maze.getCavesWithPits();
+    ArrayList<Room> cavesWithBats = maze.getCavesWithBats();
+    ArrayList<Room> rooms = maze.getRooms();
+    Room playerLoc = player.getLocation();
+
+    view.paint(rooms, caveWithWumpus,
+        cavesWithBats, cavesWithPits, playerLoc);
+    timer.start();
+  }
+
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Room beforeLoc = player.getLocation();
+    Direction targetDir = input.getDirection();
+    input.resetDirection();
+    player.move(beforeLoc, targetDir);
+    Room afterLoc = player.getLocation();
+    if (beforeLoc != afterLoc){
+      System.out.println("new location - " + afterLoc.getId());
+      view.repaintPlayer(afterLoc);
+    }
+
+
   }
 
   /**
@@ -284,4 +320,5 @@ public class Controller {
     }
     return false;
   }
+
 }
