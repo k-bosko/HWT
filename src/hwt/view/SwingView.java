@@ -2,10 +2,8 @@ package hwt.view;
 
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
-import hwt.model.Room;
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 

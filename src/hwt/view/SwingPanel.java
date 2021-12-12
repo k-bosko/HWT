@@ -42,6 +42,8 @@ public class SwingPanel extends JPanel {
   private static final int ROOM_SIZE = 64;
   private static final int WUMPUS_SIZE = 32;
   private static final int BATS_SIZE = 30;
+  private static final int PLAYER_SIZE = 15;
+
   private BufferedImage roombase_1;
   private BufferedImage roombase_3;
   private BufferedImage roombase_4;
@@ -50,17 +52,25 @@ public class SwingPanel extends JPanel {
   private BufferedImage wumpus;
   private BufferedImage superbats;
   private BufferedImage pit;
-  private BufferedImage player;
+  private BufferedImage pitNearby;
+  private BufferedImage wumpusNearby;
+  private BufferedImage target;
+  private BufferedImage playerImg;
+
 
   private List<Room> rooms;
   private Room roomWithWumpus;
   private List<Room> roomsWithBats;
+  private List<Room> roomsWithPits;
+  private Player player;
 
   public SwingPanel(PerfectMaze maze, Player player){
     //load images
     this.rooms = maze.getRooms();
     this.roomWithWumpus = maze.getCaveWithWumpus();
     this.roomsWithBats = maze.getCavesWithBats();
+    this.roomsWithPits = maze.getCavesWithPits();
+    this.player = player;
 
 
     try {
@@ -69,10 +79,13 @@ public class SwingPanel extends JPanel {
       this.roombase_4 = ImageIO.read(new File("./img/roombase-4.png"));
       this.hallway_straight = ImageIO.read(new File("./img/hallway-straight.png"));
       this.hallway = ImageIO.read(new File("./img/hallway.png"));
-      this.player = ImageIO.read(new File("./img/player-original.png"));
       this.wumpus = ImageIO.read(new File("./img/wumpus.png"));
       this.superbats = ImageIO.read(new File("./img/superbat.png"));
       this.pit = ImageIO.read(new File("./img/slime-pit.png"));
+      this.pitNearby = ImageIO.read(new File("./img/slime-pit-nearby.png"));
+      this.pitNearby = ImageIO.read(new File("./img/wumpus-nearby.png"));
+      this.target = ImageIO.read(new File("./img/target.png"));
+      this.playerImg = ImageIO.read(new File("./img/player.png"));
 
     } catch (IOException e) {
       System.out.println("File doesn't exist");
@@ -104,6 +117,11 @@ public class SwingPanel extends JPanel {
       g2d.drawImage(img, t, this);
     }
 
+    for (int i = 0; i < this.roomsWithPits.size(); i++){
+      Coordinates coordPit = getCoordinates(this.roomsWithPits.get(i), 0);
+      g2d.drawImage(this.pit, coordPit.getX(), coordPit.getY(), this);
+    }
+
     Coordinates coordWumpus = getCoordinates(this.roomWithWumpus, 0);
     int wumpusShift = (ROOM_SIZE - WUMPUS_SIZE)/2;
     g2d.drawImage(this.wumpus, coordWumpus.getX() + wumpusShift,
@@ -112,16 +130,15 @@ public class SwingPanel extends JPanel {
     for (int i = 0; i < this.roomsWithBats.size(); i++){
       Coordinates coordBats = getCoordinates(this.roomsWithBats.get(i), 0);
       int batsShift = (ROOM_SIZE - BATS_SIZE)/2;
-      g2d.drawImage(this.superbats, coordWumpus.getX() + wumpusShift,
-          coordWumpus.getY() + wumpusShift, this);
+      g2d.drawImage(this.superbats, coordBats.getX() + wumpusShift,
+          coordBats.getY() + wumpusShift, this);
     }
 
-//    if (currentRoom.getCaveType().contains(CaveType.SUPERBATS)){
-//      g2d.drawImage(this.superbats, coord.getX(), coord.getY(), this);
-//    }
-//    if (currentRoom.getCaveType().contains(CaveType.PIT)){
-//      g2d.drawImage(this.pit, coord.getX(), coord.getY(), this);
-//    }
+    Coordinates coordPlayer = getCoordinates(player.getLocation(), 0);
+    int playerShift = (ROOM_SIZE - PLAYER_SIZE)/2;
+    g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
+        coordPlayer.getY() + playerShift, this);
+
   }
 
   private BufferedImage getImage(int numDoors, List<Direction> directions) throws IllegalArgumentException{
