@@ -37,4 +37,14 @@ public class SwingView implements View {
     panel.repaintPlayer(playerLoc);
   }
 
+  @Override
+  public void repaintNearbyWumpus(Room nearby) {
+    panel.repaintNearbyWumpus(nearby);
+  }
+
+  @Override
+  public void repaintNearbyPit(Room nearby) {
+    panel.repaintNearbyPit(nearby);
+  }
+
 }

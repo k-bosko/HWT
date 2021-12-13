@@ -11,4 +11,6 @@ public interface View {
       List<Room> roomsWithBats, List<Room> roomsWithPits, Room playerLoc);
 
   void repaintPlayer(Room playerLoc);
+  void repaintNearbyPit(Room nearby);
+  void repaintNearbyWumpus(Room nearby);
 }

@@ -1,5 +1,6 @@
 package hwt.view;
 
+import hwt.model.CaveType;
 import hwt.model.Direction;
 import hwt.model.Room;
 import input.KeyBoardHandler;
@@ -56,13 +57,15 @@ public class SwingPanel extends JPanel {
   private BufferedImage target;
   private BufferedImage playerImg;
 
-
   private List<Room> rooms;
   private Room caveWithWumpus;
   private List<Room> cavesWithBats;
   private List<Room> cavesWithPits;
   private Room playerLoc;
   private boolean initialized = false;
+  private Room caveNearbyWumpus;
+  private Room caveNearbyPit;
+
   //initialized -> need to avoid calling paintComponent on uninitialized data (-> null pointer exception)
   // bc we don't transfer data we need in constructor but with paint call
 
@@ -78,7 +81,7 @@ public class SwingPanel extends JPanel {
       this.superbats = ImageIO.read(new File("./img/superbat.png"));
       this.pit = ImageIO.read(new File("./img/slime-pit.png"));
       this.pitNearby = ImageIO.read(new File("./img/slime-pit-nearby.png"));
-      this.pitNearby = ImageIO.read(new File("./img/wumpus-nearby.png"));
+      this.wumpusNearby = ImageIO.read(new File("./img/wumpus-nearby.png"));
       this.target = ImageIO.read(new File("./img/target.png"));
       this.playerImg = ImageIO.read(new File("./img/player.png"));
 
@@ -87,10 +90,7 @@ public class SwingPanel extends JPanel {
     }
 
     // register the keyboard handler
-//    if (input != null) {
-      addKeyListener(input);
-
-//    }
+    addKeyListener(input);
     this.setFocusable(true);
 
   }
@@ -153,7 +153,16 @@ public class SwingPanel extends JPanel {
           coordBats.getY() + wumpusShift, this);
     }
 
-    Coordinates coordPlayer = getCoordinates(playerLoc, 0);
+    if (this.caveNearbyWumpus != null){
+      Coordinates coordCaveNearbyWumpus = getCoordinates(this.caveNearbyWumpus, 0);
+      g2d.drawImage(this.wumpusNearby, coordCaveNearbyWumpus.getX(), coordCaveNearbyWumpus.getY(), this);
+    }
+   if (this.caveNearbyPit != null){
+     Coordinates coordCaveNearbyPit = getCoordinates(this.caveNearbyPit, 0);
+     g2d.drawImage(this.pitNearby, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
+   }
+
+    Coordinates coordPlayer = getCoordinates(this.playerLoc, 0);
     int playerShift = (ROOM_SIZE - PLAYER_SIZE)/2;
     g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
         coordPlayer.getY() + playerShift, this);
@@ -250,4 +259,15 @@ public class SwingPanel extends JPanel {
     this.playerLoc = playerLoc;
     repaint();
   }
+
+  public void repaintNearbyWumpus(Room caveNearby) {
+    this.caveNearbyWumpus = caveNearby;
+    repaint();
+  }
+
+  public void repaintNearbyPit(Room caveNearby){
+    this.caveNearbyPit = caveNearby;
+    repaint();
+  }
+
 }

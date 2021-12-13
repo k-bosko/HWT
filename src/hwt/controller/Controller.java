@@ -1,10 +1,12 @@
 package hwt.controller;
 
+import hwt.StartType;
 import hwt.model.CaveType;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Direction;
 import hwt.model.Room;
+import hwt.view.DialogBox;
 import hwt.view.View;
 import input.GameInput;
 import java.awt.event.ActionEvent;
@@ -27,18 +29,34 @@ public class Controller implements ActionListener {
   private static boolean wumpusKilled = false;
   private static final int PERIOD = 150;
 
+  private StartType type;
+  private Room caveWithWumpus;
+  private ArrayList<Room> cavesWithPits;
+  private ArrayList<Room> cavesWithBats;
+  private ArrayList<Room> rooms;
+
   public Controller(PerfectMaze maze, Player player, View view, GameInput input){
-    this.maze = maze;
+    this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
     this.player = player;
     this.view = view;
     this.input = input;
     this.timer = new Timer(PERIOD /* 60 fps */, this);
+    this.caveWithWumpus = maze.getCaveWithWumpus();
+    this.cavesWithPits = maze.getCavesWithPits();
+    this.cavesWithBats = maze.getCavesWithBats();
+    this.rooms = maze.getRooms();
   }
 
+  public void start(StartType type){
+    this.type = type;
+    if (type == StartType.GUI){
+      this.startGUI();
+    }
+    else {
+      this.startText();
+    }
+  }
   public void startText(){
-    Room caveWithWumpus = maze.getCaveWithWumpus();
-    ArrayList<Room> cavesWithPits = maze.getCavesWithPits();
-
     System.out.println("===============================================");
     System.out.println("WELCOME to HUNT THE WUMPUS!");
     System.out.println("===============================================");
@@ -54,10 +72,6 @@ public class Controller implements ActionListener {
     }
   }
   public void startGUI() {
-    Room caveWithWumpus = maze.getCaveWithWumpus();
-    ArrayList<Room> cavesWithPits = maze.getCavesWithPits();
-    ArrayList<Room> cavesWithBats = maze.getCavesWithBats();
-    ArrayList<Room> rooms = maze.getRooms();
     Room playerLoc = player.getLocation();
 
     view.paint(rooms, caveWithWumpus,
@@ -76,8 +90,9 @@ public class Controller implements ActionListener {
     if (beforeLoc != afterLoc){
       System.out.println("new location - " + afterLoc.getId());
       view.repaintPlayer(afterLoc);
+      checkAdjacentCaves(afterLoc, caveWithWumpus, cavesWithPits);
+      checkMoveForHazards(afterLoc);
     }
-
 
   }
 
@@ -93,12 +108,16 @@ public class Controller implements ActionListener {
 
     ArrayList<Room> adjacentCaves = currentCave.getAdjacentCaves();
     if (adjacentCaves.contains(roomWithWumpus)){
-      System.out.println("You smell something terrible nearby...");
+      String messageWumpusNearby = "You smell something terrible nearby...";
+      view.repaintNearbyWumpus(currentCave);
+      printMessage(messageWumpusNearby, "");
     }
 
     for (Room caveWithPit : cavesWithPits) {
       if (adjacentCaves.contains(caveWithPit)) {
-        System.out.println("You feel a cold wind blowing...");
+        String messagePitNearby = "You feel a cold wind blowing...";
+        view.repaintNearbyPit(currentCave);
+        printMessage(messagePitNearby, "");
       }
     }
   }
@@ -276,15 +295,15 @@ public class Controller implements ActionListener {
     boolean superbatsWorked = checkSuperbats(currentCave);
     //if entered a cave with a pit and there are no superbats/superbats didn't work...
     if (currentCave.getCaveType().contains(CaveType.PIT) && !superbatsWorked){
-      System.out.println("Oh no! You fell into the bottomless pit...");
-      System.out.println("Better luck next time\nGame Over");
+      String messagePit = "Oh no! You fell into the bottomless pit... Better luck next time";
+      printMessage(messagePit, "Game Over");
       System.exit(0);
     }
 
     //if entered a cave with wumpus and there are no superbats/superbats didn't work...
     if (currentCave.getCaveType().contains(CaveType.WUMPUS) && !superbatsWorked){
-      System.out.println("Chomp chomp chomp... Thank you for feeding the wumpus!");
-      System.out.println("Better luck next time\nGame Over");
+      String messageWumpus = "Chomp chomp chomp... Thank you for feeding the wumpus! Better luck next time";
+      printMessage(messageWumpus, "Game Over");
       System.exit(0);
     }
   }
@@ -303,22 +322,35 @@ public class Controller implements ActionListener {
       int randomIdx = Math.abs(rand.nextInt()) % 2; //generate 0 or 1
 //      System.out.println("randomIdx: " + randomIdx);
       //you get carried away if randomIdx is 1
+      String messageBatsWorked = "Snatch - you are grabbed by superbats";
       if (randomIdx == 1) {
-        System.out.println("Snatch - you are grabbed by superbats and ...");
+        printMessage(messageBatsWorked, "");
+
         ArrayList<Room> roomsWithCaves = maze.getRoomsWithCaves();
         //generate newRoomId
         randomIdx = rand.nextInt(roomsWithCaves.size());
         Room newRoom = roomsWithCaves.get(randomIdx);
         player.setLocation(newRoom);
-//        System.out.println("new location: " + player.getLocation().getId());
+        view.repaintPlayer(newRoom);
         checkMoveForHazards(newRoom);
         return true;
       }
       else {
-        System.out.println("Whoa -- you successfully duck superbats that try to grab you");
+        String messageBatsNotWorked = "Whoa -- you successfully duck superbats that try to grab you";
+        printMessage(messageBatsNotWorked, "");
       }
     }
     return false;
+  }
+
+  public void printMessage(String message, String title){
+    if (type == StartType.TEXT){
+      System.out.println(message);
+      System.out.println(title);
+    }
+    else {
+      DialogBox.createDialogBox(message, title);
+    }
   }
 
 }

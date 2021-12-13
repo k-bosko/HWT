@@ -5,6 +5,7 @@ import hwt.model.MazeBuilder;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Room;
+import hwt.view.DialogBox;
 import hwt.view.SwingPanel;
 import hwt.view.SwingView;
 import hwt.view.View;
@@ -61,12 +62,11 @@ public class Driver {
     View view = new SwingView(input);
 
     Controller c = new Controller(maze, player, view, input);
-
 //    maze.printWalls();
 //    maze.printRoomsInfo();
 
-    c.startGUI();
-//    c.startText();
+    c.start(StartType.GUI);
+
 
 
   }
