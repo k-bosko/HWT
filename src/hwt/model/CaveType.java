@@ -3,5 +3,7 @@ package hwt.model;
 public enum CaveType {
   SUPERBATS,
   PIT,
-  WUMPUS
+  WUMPUS,
+  NEARBY_WUMPUS,
+  NEARBY_PIT
 }

@@ -1,5 +1,6 @@
 package hwt.controller;
 
+import hwt.Parameters;
 import hwt.StartType;
 import hwt.model.CaveType;
 import hwt.model.PerfectMaze;
@@ -15,37 +16,51 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.Timer;
 
 
 public class Controller implements ActionListener {
   private final PerfectMaze maze;
   private final Player player;
-  private final View view;
-  private final GameInput input;
-  private final Timer timer;
-  static Pattern patternDigits = Pattern.compile("[^\\d]");
-  private static boolean wumpusKilled = false;
-  private static final int PERIOD = 150;
+  private View view = null;
+  private GameInput input = null;
+  private Timer timer = null;
+  private boolean wumpusKilled = false;
 
   private StartType type;
   private Room caveWithWumpus;
   private ArrayList<Room> cavesWithPits;
   private ArrayList<Room> cavesWithBats;
+  private ArrayList<Room> cavesNearbyPits;
+  private ArrayList<Room> cavesNearbyWumpus;
   private ArrayList<Room> rooms;
 
-  public Controller(PerfectMaze maze, Player player, View view, GameInput input){
+  public Controller(PerfectMaze maze, Player player){
     this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
     this.player = player;
-    this.view = view;
-    this.input = input;
-    this.timer = new Timer(PERIOD /* 60 fps */, this);
     this.caveWithWumpus = maze.getCaveWithWumpus();
     this.cavesWithPits = maze.getCavesWithPits();
     this.cavesWithBats = maze.getCavesWithBats();
     this.rooms = maze.getRooms();
+    this.cavesNearbyPits = maze.getCavesNearbyPits();
+    this.cavesNearbyWumpus = maze.getCavesNearbyWumpus();
   }
+
+  public Controller(PerfectMaze maze, Player player, View view, GameInput input){
+    this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
+    this.player = player;
+    this.caveWithWumpus = maze.getCaveWithWumpus();
+    this.cavesWithPits = maze.getCavesWithPits();
+    this.cavesWithBats = maze.getCavesWithBats();
+    this.rooms = maze.getRooms();
+    this.cavesNearbyPits = maze.getCavesNearbyPits();
+    this.cavesNearbyWumpus = maze.getCavesNearbyWumpus();
+
+    this.view = view;
+    this.input = input;
+    this.timer = new Timer(Parameters.TIMER_PERIOD /* 60 fps */, this);
+  }
+
 
   public void start(StartType type){
     this.type = type;
@@ -66,7 +81,7 @@ public class Controller implements ActionListener {
 
     while (!wumpusKilled) {
       Room currentCave = player.getLocation();
-      checkAdjacentCaves(currentCave, caveWithWumpus, cavesWithPits);
+      checkAdjacentCaves(currentCave);
       printOptions(currentCave);
       shootOrMove(currentCave);
     }
@@ -75,7 +90,7 @@ public class Controller implements ActionListener {
     Room playerLoc = player.getLocation();
 
     view.paint(rooms, caveWithWumpus,
-        cavesWithBats, cavesWithPits, playerLoc);
+        cavesWithBats, cavesWithPits, cavesNearbyPits, cavesNearbyWumpus, playerLoc);
     timer.start();
   }
 
@@ -84,13 +99,16 @@ public class Controller implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     Room beforeLoc = player.getLocation();
     Direction targetDir = input.getDirection();
+    //need to reset direction to null because we use Timer, otherwise will move constantly in 1 direction
     input.resetDirection();
-    player.move(beforeLoc, targetDir);
+    player.moveByCaves(beforeLoc, targetDir);
     Room afterLoc = player.getLocation();
+    //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
+    //only if the player location changed
     if (beforeLoc != afterLoc){
-      System.out.println("new location - " + afterLoc.getId());
+//      System.out.println("new location - " + afterLoc.getId());
       view.repaintPlayer(afterLoc);
-      checkAdjacentCaves(afterLoc, caveWithWumpus, cavesWithPits);
+      checkAdjacentCaves(afterLoc);
       checkMoveForHazards(afterLoc);
     }
 
@@ -100,25 +118,17 @@ public class Controller implements ActionListener {
    * checkAdjacentCaves() checks if there is a wumpus or a pit in adjacent caves
    * prints respective messages to the user
    * @param currentCave
-   * @param roomWithWumpus
-   * @param cavesWithPits
    */
-  public void checkAdjacentCaves(Room currentCave, Room roomWithWumpus,
-      ArrayList<Room> cavesWithPits){
+  public void checkAdjacentCaves(Room currentCave){
 
-    ArrayList<Room> adjacentCaves = currentCave.getAdjacentCaves();
-    if (adjacentCaves.contains(roomWithWumpus)){
+    if (currentCave.getCaveType().contains(CaveType.NEARBY_WUMPUS)){
       String messageWumpusNearby = "You smell something terrible nearby...";
-      view.repaintNearbyWumpus(currentCave);
       printMessage(messageWumpusNearby, "");
     }
 
-    for (Room caveWithPit : cavesWithPits) {
-      if (adjacentCaves.contains(caveWithPit)) {
-        String messagePitNearby = "You feel a cold wind blowing...";
-        view.repaintNearbyPit(currentCave);
-        printMessage(messagePitNearby, "");
-      }
+    if (currentCave.getCaveType().contains(CaveType.NEARBY_PIT)) {
+      String messagePitNearby = "You feel a cold wind blowing...";
+      printMessage(messagePitNearby, "");
     }
   }
 
@@ -167,24 +177,22 @@ public class Controller implements ActionListener {
       currentCave = player.getLocation();
       System.out.println("You are now in cave #" + currentCave.getId());
     }
-    else if (input.equals("s")){
+    else if (input.equals("s")) {
       //validate input for number of caves
       boolean invalidInput = true;
       int numCaves = 0;
-      while (invalidInput){
+      while (invalidInput) {
         System.out.println("No. of caves (1-5)?");
         String cavesInput = sc.nextLine();
-        Matcher matcher = patternDigits.matcher(cavesInput);
+        Matcher matcher = Parameters.PATTERN_DIGITS.matcher(cavesInput);
         boolean matchFound = matcher.find();
         if (matchFound) {
           System.out.println("Your input is not a valid number");
-        }
-        else {
+        } else {
           numCaves = Integer.valueOf(cavesInput);
-          if (numCaves >= 1 && numCaves <= 5){
+          if (numCaves >= 1 && numCaves <= 5) {
             invalidInput = false;
-          }
-          else {
+          } else {
             System.out.println("Can't shoot that number. Please enter a number between 1 and 5");
           }
         }
@@ -193,60 +201,60 @@ public class Controller implements ActionListener {
       //validate input
       invalidInput = true;
       String directionInput = null;
-      while (invalidInput){
+      while (invalidInput) {
         directionInput = sc.nextLine();
         if (directionInput.equals("n") ||
             directionInput.equals("w") ||
             directionInput.equals("e") ||
-            directionInput.equals("s")){
+            directionInput.equals("s") ||
+            directionInput.equals("q")) {
           invalidInput = false;
-        }
-        else {
-          System.out.println("Illegal command. Please enter either e, w, s, n");
+        } else {
+          System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
         }
       }
       Room targetCave = currentCave;
-      for (int i = 0; i < numCaves; i++){
-        if (directionInput.equals("s") && targetCave != null){
+      for (int i = 0; i < numCaves; i++) {
+        if (directionInput.equals("s") && targetCave != null) {
           targetCave = targetCave.findAdjacentCave(Direction.SOUTH);
-        }
-        else if (directionInput.equals("n") && targetCave != null){
+        } else if (directionInput.equals("n") && targetCave != null) {
           targetCave = targetCave.findAdjacentCave(Direction.NORTH);
-        }
-        else if (directionInput.equals("w") && targetCave != null){
+        } else if (directionInput.equals("w") && targetCave != null) {
           targetCave = targetCave.findAdjacentCave(Direction.WEST);
-        }
-        else if (directionInput.equals("e") && targetCave != null){
+        } else if (directionInput.equals("e") && targetCave != null) {
           targetCave = targetCave.findAdjacentCave(Direction.EAST);
+        } else if (directionInput.equals("q")) {
+          System.out.println("Exiting the game");
+          System.exit(0);
         }
       }
       //targetCave is null if player specified larger distance than an arrow can travel
-      if (targetCave != null){
+      if (targetCave != null) {
         System.out.println("Your arrow reached cave #" + targetCave.getId());
-        if (targetCave.getCaveType().contains(CaveType.WUMPUS)){
+        if (targetCave.getCaveType().contains(CaveType.WUMPUS)) {
           wumpusKilled = true;
           System.out.println("Hee hee hee, you got the wumpus!");
           System.out.println("Next time you won't be so lucky\nGame Over");
           System.exit(0);
-        }
-        else {
+        } else {
           System.out.println("You missed...");
         }
-      }
-      else {
+      } else {
         System.out.println("You missed...");
       }
       player.decreaseArrows();
       int numArrows = player.getNumArrows();
       System.out.println("Your number of arrows is now: " + numArrows);
-      if (numArrows == 0){
+      if (numArrows == 0) {
         System.out.println("Oh no! You ran out of arrows...\nGame Over");
         System.exit(0);
       }
-      if (numArrows == 1){
+      if (numArrows == 1) {
         System.out.println("Be careful! If you miss next time, you lose");
       }
-
+    } else if (input.equals("q")){
+      System.out.println("Exiting the game");
+      System.exit(0);
     } else {
       System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
     }
@@ -263,18 +271,19 @@ public class Controller implements ActionListener {
     ArrayList<Direction> possibleMoves = currentCave.getDirections();
 
     if (input.equals("n") && possibleMoves.contains(Direction.NORTH)){
-      player.move(currentCave, Direction.NORTH);
+      player.moveByCaves(currentCave, Direction.NORTH);
     }
     else if (input.equals("s") && possibleMoves.contains(Direction.SOUTH)){
-      player.move(currentCave, Direction.SOUTH);
+      player.moveByCaves(currentCave, Direction.SOUTH);
     }
     else if (input.equals("w") && possibleMoves.contains(Direction.WEST)){
-      player.move(currentCave, Direction.WEST);
+      player.moveByCaves(currentCave, Direction.WEST);
     }
     else if (input.equals("e") && possibleMoves.contains(Direction.EAST)){
-      player.move(currentCave, Direction.EAST);
+      player.moveByCaves(currentCave, Direction.EAST);
     }
     else if (input.equals("q")){
+      System.out.println("Exiting the game");
       System.exit(0);
     }
     else {

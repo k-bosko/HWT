@@ -13,6 +13,7 @@ public class Player {
   private Room location;
   private int numArrows;
 
+
   public Player(Room start, int numArrows){
     this.location = start;
     this.numArrows = numArrows;
@@ -47,14 +48,31 @@ public class Player {
   }
 
   /**
-   * move() sets the new player location after moving east/west/north/south
+   * moveByCaves() sets the new player location after moving east/west/north/south to a respective cave
+   * as a result ignores tunnels
+   * utilizes ArrayList<HashMap> directionsToAdjacentCaves saved for every Cave
+   * to be used in TEXT game mode
    */
-  public void move(Room currentCave, Direction direction){
+  public void moveByCaves(Room currentCave, Direction direction){
     for (HashMap<Direction, Room> directionHashMap: currentCave.getDirectionsToAdjacentCaves()){
       if (directionHashMap.containsKey(direction)){
         this.location = directionHashMap.get(direction);
       }
     }
   }
+
+//  /**
+//   * moveByRoom() sets the new player location after moving east/west/north/south to a respective room
+//   * irrespective if it's Tunnel or
+//   * utilizes ArrayList<HashMap> directionsToAdjacentRooms saved for every Room
+//   * to be used in GUI game mode (bc we need to reveal map room by room)
+//   */
+//  public void moveByRooms(Room currentCave, Direction direction){
+//    for (HashMap<Direction, Room> directionHashMap: currentCave.getDirectionsToAdjacentRooms()){
+//      if (directionHashMap.containsKey(direction)){
+//        this.location = directionHashMap.get(direction);
+//      }
+//    }
+//  }
 
 }

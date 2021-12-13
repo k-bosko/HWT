@@ -20,6 +20,8 @@ public abstract class PerfectMaze implements Maze {
   private ArrayList<Room> cavesWithPits = new ArrayList<>();
   private ArrayList<Room> cavesWithBats = new ArrayList<>();
   private Room caveWithWumpus;
+  private ArrayList<Room> cavesNearbyWumpus = new ArrayList<>();
+  private ArrayList<Room> cavesNearbyPits = new ArrayList<>();
   private ArrayList<Room> roomsWithCaves = new ArrayList<>();
 
 
@@ -52,6 +54,10 @@ public abstract class PerfectMaze implements Maze {
   public ArrayList<Room> getRoomsWithCaves(){
     return this.roomsWithCaves;
   }
+
+  public ArrayList<Room> getCavesNearbyWumpus() { return this.cavesNearbyWumpus; }
+
+  public ArrayList<Room> getCavesNearbyPits() { return this.cavesNearbyPits; }
 
   /**
    * getNumCols() returns number of columns in a maze
@@ -405,26 +411,46 @@ public abstract class PerfectMaze implements Maze {
     }
     while (pits < this.numRoomsWithPits) {
       randomIdx = rand.nextInt(mazeSize);
-      if (rooms.get(randomIdx).getType() == RoomType.CAVE &&
-          !rooms.get(randomIdx).getCaveType().contains(CaveType.PIT) &&
+      Room pitRoom = rooms.get(randomIdx);
+      if (pitRoom.getType() == RoomType.CAVE &&
+          !pitRoom.getCaveType().contains(CaveType.PIT) &&
           randomIdx != start) {
-        rooms.get(randomIdx).getCaveType().add(CaveType.PIT);
+        pitRoom.getCaveType().add(CaveType.PIT);
         cavesWithPits.add(rooms.get(randomIdx));
         pits++;
       }
     }
     while (wumpus < 1) {
       randomIdx = rand.nextInt(mazeSize);
-      if (rooms.get(randomIdx).getType() == RoomType.CAVE &&
-          !rooms.get(randomIdx).getCaveType().contains(CaveType.WUMPUS) &&
+      Room wumpusRoom = rooms.get(randomIdx);
+      if (wumpusRoom.getType() == RoomType.CAVE &&
+//          !wumpusRoom.getCaveType().contains(CaveType.WUMPUS) &&
           randomIdx != start) {
-        rooms.get(randomIdx).getCaveType().add(CaveType.WUMPUS);
-        caveWithWumpus = rooms.get(randomIdx);
-        wumpus++;
+        wumpusRoom.getCaveType().add(CaveType.WUMPUS);
+        caveWithWumpus = wumpusRoom;
+          wumpus++;
       }
     }
   }
 
+  public void updateInfoForNearbyCaves(){
+    //update info for nearby caves
+    ArrayList<Room> adjacentWumpusRooms = this.caveWithWumpus.getAdjacentCaves();
+    for (Room roomNearby : adjacentWumpusRooms) {
+      roomNearby.getCaveType().add(CaveType.NEARBY_WUMPUS);
+      cavesNearbyWumpus.add(roomNearby);
+    }
+
+    //update info for nearby caves
+    for (Room pitRoom: this.cavesWithPits){
+      ArrayList<Room> adjacentPitRooms = pitRoom.getAdjacentCaves();
+      for (Room roomNearby: adjacentPitRooms) {
+        roomNearby.getCaveType().add(CaveType.NEARBY_PIT);
+        cavesNearbyPits.add(roomNearby);
+      }
+    }
+
+  }
   /**
    * moveNorth() calculates adjacent room Id to the north
    */

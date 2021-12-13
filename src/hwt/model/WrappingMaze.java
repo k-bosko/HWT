@@ -12,6 +12,7 @@ public class WrappingMaze extends RoomMaze {
     determineRoomType();
     setCaveType();
     addAdjacentCaves();
+    updateInfoForNearbyCaves();
     recalibrateStart();
   }
 }

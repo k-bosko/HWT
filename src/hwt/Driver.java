@@ -5,19 +5,16 @@ import hwt.model.MazeBuilder;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Room;
-import hwt.view.DialogBox;
-import hwt.view.SwingPanel;
 import hwt.view.SwingView;
 import hwt.view.View;
 import input.GameInput;
 import input.KeyBoardHandler;
-import javax.swing.JPanel;
 
 public class Driver {
+
   public static void main(String[] args) throws ArrayIndexOutOfBoundsException{
-    final int NUM_ARROWS = 2;
     //default for arrows
-    int numArrows = NUM_ARROWS;
+    int numArrows = Parameters.NUM_ARROWS;
 
     if (args.length < 3) {
       throw new ArrayIndexOutOfBoundsException("Please specify number of rows, number of columns "
@@ -49,6 +46,7 @@ public class Driver {
       mazeBuilder.specifyBatsNumber(numBats);
 
       numArrows = Integer.parseInt(args[5]);
+
     }
 
     PerfectMaze maze = mazeBuilder.build();
@@ -58,15 +56,23 @@ public class Driver {
     Room startCave = maze.getRoomBy(start);
     Player player = new Player(startCave, numArrows);
 
-    GameInput input = new KeyBoardHandler();
-    View view = new SwingView(input);
+    //switch between GUI and TEXT game modes
+    StartType gameType = StartType.GUI;
 
-    Controller c = new Controller(maze, player, view, input);
+    if (gameType == StartType.GUI){
+      GameInput input = new KeyBoardHandler();
+      View view = new SwingView(input);
+
+      Controller c = new Controller(maze, player, view, input);
+      c.start(StartType.GUI);
+    }
+    else {
+      Controller c = new Controller(maze, player);
+      c.start(StartType.TEXT);
+    }
+
 //    maze.printWalls();
 //    maze.printRoomsInfo();
-
-    c.start(StartType.GUI);
-
 
 
   }

@@ -1,5 +1,6 @@
 package hwt.view;
 
+import hwt.Parameters;
 import hwt.model.CaveType;
 import hwt.model.Direction;
 import hwt.model.Room;
@@ -39,10 +40,7 @@ public class SwingPanel extends JPanel {
       return y;
     }
   }
-  private static final int ROOM_SIZE = 64;
-  private static final int WUMPUS_SIZE = 32;
-  private static final int BATS_SIZE = 30;
-  private static final int PLAYER_SIZE = 15;
+
 
   private BufferedImage roombase_1;
   private BufferedImage roombase_3;
@@ -63,8 +61,8 @@ public class SwingPanel extends JPanel {
   private List<Room> cavesWithPits;
   private Room playerLoc;
   private boolean initialized = false;
-  private Room caveNearbyWumpus;
-  private Room caveNearbyPit;
+  private List<Room> cavesNearbyWumpus;
+  private List<Room> cavesNearbyPits;
 
   //initialized -> need to avoid calling paintComponent on uninitialized data (-> null pointer exception)
   // bc we don't transfer data we need in constructor but with paint call
@@ -92,15 +90,18 @@ public class SwingPanel extends JPanel {
     // register the keyboard handler
     addKeyListener(input);
     this.setFocusable(true);
-
   }
 
   public void paint(List<Room> rooms, Room caveWithWumpus,
-      List<Room> cavesWithBats, List<Room> cavesWithPits, Room playerLoc){
+      List<Room> cavesWithBats, List<Room> cavesWithPits, List<Room> cavesNearbyPits,
+      List<Room> cavesNearbyWumpus,
+      Room playerLoc){
     this.rooms = rooms;
     this.caveWithWumpus = caveWithWumpus;
     this.cavesWithBats = cavesWithBats;
     this.cavesWithPits = cavesWithPits;
+    this.cavesNearbyPits = cavesNearbyPits;
+    this.cavesNearbyWumpus = cavesNearbyWumpus;
     this.playerLoc = playerLoc;
     this.initialized = true;
 
@@ -142,28 +143,29 @@ public class SwingPanel extends JPanel {
     }
 
     Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
-    int wumpusShift = (ROOM_SIZE - WUMPUS_SIZE)/2;
+    int wumpusShift = (Parameters.ROOM_SIZE - Parameters.WUMPUS_SIZE)/2;
     g2d.drawImage(this.wumpus, coordWumpus.getX() + wumpusShift,
         coordWumpus.getY() + wumpusShift, this);
 
-    for (int i = 0; i < this.cavesWithBats.size(); i++){
-      Coordinates coordBats = getCoordinates(this.cavesWithBats.get(i), 0);
-      int batsShift = (ROOM_SIZE - BATS_SIZE)/2;
-      g2d.drawImage(this.superbats, coordBats.getX() + wumpusShift,
-          coordBats.getY() + wumpusShift, this);
-    }
-
-    if (this.caveNearbyWumpus != null){
-      Coordinates coordCaveNearbyWumpus = getCoordinates(this.caveNearbyWumpus, 0);
+   for (Room caveNearbyWumpus: this.cavesNearbyWumpus){
+      Coordinates coordCaveNearbyWumpus = getCoordinates(caveNearbyWumpus, 0);
       g2d.drawImage(this.wumpusNearby, coordCaveNearbyWumpus.getX(), coordCaveNearbyWumpus.getY(), this);
     }
-   if (this.caveNearbyPit != null){
-     Coordinates coordCaveNearbyPit = getCoordinates(this.caveNearbyPit, 0);
+
+   for (Room caveNearbyPit: this.cavesNearbyPits){
+     Coordinates coordCaveNearbyPit = getCoordinates(caveNearbyPit, 0);
      g2d.drawImage(this.pitNearby, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
    }
 
+    for (int i = 0; i < this.cavesWithBats.size(); i++){
+      Coordinates coordBats = getCoordinates(this.cavesWithBats.get(i), 0);
+      int batsShift = (Parameters.ROOM_SIZE - Parameters.BATS_SIZE)/2;
+      g2d.drawImage(this.superbats, coordBats.getX() + batsShift,
+          coordBats.getY() + batsShift, this);
+    }
+
     Coordinates coordPlayer = getCoordinates(this.playerLoc, 0);
-    int playerShift = (ROOM_SIZE - PLAYER_SIZE)/2;
+    int playerShift = (Parameters.ROOM_SIZE - Parameters.PLAYER_SIZE)/2;
     g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
         coordPlayer.getY() + playerShift, this);
 
@@ -238,35 +240,25 @@ public class SwingPanel extends JPanel {
   }
 
   private Coordinates getCoordinates(Room currentRoom, int degrees){
-    int y = currentRoom.getRowId() * ROOM_SIZE;
-    int x = currentRoom.getColId() * ROOM_SIZE;
+    int y = currentRoom.getRowId() * Parameters.ROOM_SIZE;
+    int x = currentRoom.getColId() * Parameters.ROOM_SIZE;
 
     switch(degrees){
       case 90:
-        x += ROOM_SIZE;
+        x += Parameters.ROOM_SIZE;
         break;
       case 180:
-        x += ROOM_SIZE;
-        y += ROOM_SIZE;
+        x += Parameters.ROOM_SIZE;
+        y += Parameters.ROOM_SIZE;
         break;
       case 270:
-        y += ROOM_SIZE;
+        y += Parameters.ROOM_SIZE;
     }
     return new Coordinates(x, y);
   }
 
   public void repaintPlayer(Room playerLoc) {
     this.playerLoc = playerLoc;
-    repaint();
-  }
-
-  public void repaintNearbyWumpus(Room caveNearby) {
-    this.caveNearbyWumpus = caveNearby;
-    repaint();
-  }
-
-  public void repaintNearbyPit(Room caveNearby){
-    this.caveNearbyPit = caveNearby;
     repaint();
   }
 

@@ -15,6 +15,7 @@ public class RoomMaze extends PerfectMaze {
     determineRoomType();
     setCaveType();
     addAdjacentCaves();
+    updateInfoForNearbyCaves();
     recalibrateStart();
   }
 
