@@ -26,6 +26,7 @@ public class Controller implements ActionListener {
   private GameInput input = null;
   private Timer timer = null;
   private boolean wumpusKilled = false;
+  private boolean firstPaint = true;
 
   private GameType gameType;
   private Room caveWithWumpus;
@@ -34,7 +35,9 @@ public class Controller implements ActionListener {
   private ArrayList<Room> cavesNearbyPits;
   private ArrayList<Room> cavesNearbyWumpus;
   private ArrayList<Room> rooms;
+  private Player target;
 
+  //constructor for TEXT game mode
   public Controller(PerfectMaze maze, Player player){
     this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
     this.player = player;
@@ -46,6 +49,7 @@ public class Controller implements ActionListener {
     this.cavesNearbyWumpus = maze.getCavesNearbyWumpus();
   }
 
+  //constructor for GUI game mode
   public Controller(PerfectMaze maze, Player player, View view, GameInput input){
     this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
     this.player = player;
@@ -99,21 +103,40 @@ public class Controller implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     Room beforeLoc = player.getLocation();
-    Direction targetDir = input.getDirection();
+    Direction moveDirection = input.getMoveDirection();
+
     //need to reset direction to null because we use Timer, otherwise will move constantly in 1 direction
-    input.resetDirection();
-    player.moveByRooms(beforeLoc, targetDir);
+    input.resetMoveDirection();
+    player.moveByRooms(beforeLoc, moveDirection);
     Room afterLoc = player.getLocation();
     //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
     //only if the player location changed
-    if (beforeLoc != afterLoc){
+    if (beforeLoc != afterLoc) {
 //      System.out.println("new location - " + afterLoc.getId());
       view.repaintPlayer(afterLoc);
       checkAdjacentCaves(afterLoc);
       checkMoveForHazards(afterLoc);
     }
+    boolean shoot = input.getShootStatus();
 
+    if (shoot) {
+      if (firstPaint){
+        Room targetLoc = player.getLocation();
+        target = new Player(targetLoc);
+        view.repaintTarget(targetLoc);
+        firstPaint = false;
+      }
+      else {
+        Room targetLoc = target.getLocation();
+        Direction shootDir = input.getShootDirection();
+        input.resetShootDirection();
+        target.moveByRooms(targetLoc, shootDir);
+        targetLoc = target.getLocation();
+        view.repaintTarget(targetLoc);
+      }
+    }
   }
+
 
   /**
    * checkAdjacentCaves() checks if there is a wumpus or a pit in adjacent caves
@@ -178,6 +201,7 @@ public class Controller implements ActionListener {
       currentCave = player.getLocation();
       System.out.println("You are now in cave #" + currentCave.getId());
     }
+    //shoot
     else if (input.equals("s")) {
       //validate input for number of caves
       boolean invalidInput = true;

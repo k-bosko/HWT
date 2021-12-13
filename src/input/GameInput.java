@@ -4,7 +4,10 @@ import hwt.model.Direction;
 
 public interface GameInput {
 
-  Direction getDirection();
+  Direction getMoveDirection();
+  boolean getShootStatus();
+  Direction getShootDirection();
   boolean isKeyboard();
-  void resetDirection();
+  void resetMoveDirection();
+  void resetShootDirection();
 }

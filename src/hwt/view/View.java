@@ -1,9 +1,7 @@
 package hwt.view;
 
-import hwt.model.PerfectMaze;
-import hwt.model.Player;
+
 import hwt.model.Room;
-import java.util.ArrayList;
 import java.util.List;
 
 public interface View {
@@ -12,4 +10,5 @@ public interface View {
       List<Room> cavesNearbyPits, List<Room> cavesNearbyWumpus, Room playerLoc);
 
   void repaintPlayer(Room playerLoc);
+  void repaintTarget(Room targetLoc);
 }

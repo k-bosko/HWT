@@ -33,4 +33,7 @@ public class SwingView implements View {
     panel.repaintPlayer(playerLoc);
   }
 
+  public void repaintTarget(Room targetLoc) {
+    panel.repaintTarget(targetLoc);
+  }
 }

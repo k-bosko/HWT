@@ -13,6 +13,10 @@ public class Player {
   private Room location;
   private int numArrows;
 
+  public Player(Room start){
+    this.location = start;
+    this.numArrows = 2;
+  }
 
   public Player(Room start, int numArrows){
     this.location = start;

@@ -1,7 +1,6 @@
 package hwt.view;
 
 import hwt.Parameters;
-import hwt.model.CaveType;
 import hwt.model.Direction;
 import hwt.model.Room;
 import input.KeyBoardHandler;
@@ -42,17 +41,17 @@ public class SwingPanel extends JPanel {
   }
 
 
-  private BufferedImage roombase_1;
-  private BufferedImage roombase_3;
-  private BufferedImage roombase_4;
-  private BufferedImage hallway_straight;
-  private BufferedImage hallway;
-  private BufferedImage wumpus;
-  private BufferedImage superbats;
-  private BufferedImage pit;
-  private BufferedImage pitNearby;
-  private BufferedImage wumpusNearby;
-  private BufferedImage target;
+  private BufferedImage roombase_1Img;
+  private BufferedImage roombase_3Img;
+  private BufferedImage roombase_4Img;
+  private BufferedImage hallway_straightImg;
+  private BufferedImage hallwayImg;
+  private BufferedImage wumpusImg;
+  private BufferedImage superbatsImg;
+  private BufferedImage pitImg;
+  private BufferedImage pitNearbyImg;
+  private BufferedImage wumpusNearbyImg;
+  private BufferedImage targetImg;
   private BufferedImage playerImg;
 
   private List<Room> rooms;
@@ -60,7 +59,9 @@ public class SwingPanel extends JPanel {
   private List<Room> cavesWithBats;
   private List<Room> cavesWithPits;
   private Room playerLoc;
+  private Room targetLoc;
   private boolean initialized = false;
+  private boolean shoot = false;
   private List<Room> cavesNearbyWumpus;
   private List<Room> cavesNearbyPits;
 
@@ -70,17 +71,17 @@ public class SwingPanel extends JPanel {
   public SwingPanel(KeyBoardHandler input){
     //load images
     try {
-      this.roombase_1 = ImageIO.read(new File("./img/roombase-1.png"));
-      this.roombase_3 = ImageIO.read(new File("./img/roombase-3.png"));
-      this.roombase_4 = ImageIO.read(new File("./img/roombase-4.png"));
-      this.hallway_straight = ImageIO.read(new File("./img/hallway-straight.png"));
-      this.hallway = ImageIO.read(new File("./img/hallway.png"));
-      this.wumpus = ImageIO.read(new File("./img/wumpus.png"));
-      this.superbats = ImageIO.read(new File("./img/superbat.png"));
-      this.pit = ImageIO.read(new File("./img/slime-pit.png"));
-      this.pitNearby = ImageIO.read(new File("./img/slime-pit-nearby.png"));
-      this.wumpusNearby = ImageIO.read(new File("./img/wumpus-nearby.png"));
-      this.target = ImageIO.read(new File("./img/target.png"));
+      this.roombase_1Img = ImageIO.read(new File("./img/roombase-1.png"));
+      this.roombase_3Img = ImageIO.read(new File("./img/roombase-3.png"));
+      this.roombase_4Img = ImageIO.read(new File("./img/roombase-4.png"));
+      this.hallway_straightImg = ImageIO.read(new File("./img/hallway-straight.png"));
+      this.hallwayImg = ImageIO.read(new File("./img/hallway.png"));
+      this.wumpusImg = ImageIO.read(new File("./img/wumpus.png"));
+      this.superbatsImg = ImageIO.read(new File("./img/superbat.png"));
+      this.pitImg = ImageIO.read(new File("./img/slime-pit.png"));
+      this.pitNearbyImg = ImageIO.read(new File("./img/slime-pit-nearby.png"));
+      this.wumpusNearbyImg = ImageIO.read(new File("./img/wumpus-nearby.png"));
+      this.targetImg = ImageIO.read(new File("./img/target.png"));
       this.playerImg = ImageIO.read(new File("./img/player.png"));
 
     } catch (IOException e) {
@@ -139,28 +140,28 @@ public class SwingPanel extends JPanel {
 
     for (int i = 0; i < this.cavesWithPits.size(); i++){
       Coordinates coordPit = getCoordinates(this.cavesWithPits.get(i), 0);
-      g2d.drawImage(this.pit, coordPit.getX(), coordPit.getY(), this);
+      g2d.drawImage(this.pitImg, coordPit.getX(), coordPit.getY(), this);
     }
 
     Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
     int wumpusShift = (Parameters.ROOM_SIZE - Parameters.WUMPUS_SIZE)/2;
-    g2d.drawImage(this.wumpus, coordWumpus.getX() + wumpusShift,
+    g2d.drawImage(this.wumpusImg, coordWumpus.getX() + wumpusShift,
         coordWumpus.getY() + wumpusShift, this);
 
    for (Room caveNearbyWumpus: this.cavesNearbyWumpus){
       Coordinates coordCaveNearbyWumpus = getCoordinates(caveNearbyWumpus, 0);
-      g2d.drawImage(this.wumpusNearby, coordCaveNearbyWumpus.getX(), coordCaveNearbyWumpus.getY(), this);
+      g2d.drawImage(this.wumpusNearbyImg, coordCaveNearbyWumpus.getX(), coordCaveNearbyWumpus.getY(), this);
     }
 
    for (Room caveNearbyPit: this.cavesNearbyPits){
      Coordinates coordCaveNearbyPit = getCoordinates(caveNearbyPit, 0);
-     g2d.drawImage(this.pitNearby, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
+     g2d.drawImage(this.pitNearbyImg, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
    }
 
     for (int i = 0; i < this.cavesWithBats.size(); i++){
       Coordinates coordBats = getCoordinates(this.cavesWithBats.get(i), 0);
       int batsShift = (Parameters.ROOM_SIZE - Parameters.BATS_SIZE)/2;
-      g2d.drawImage(this.superbats, coordBats.getX() + batsShift,
+      g2d.drawImage(this.superbatsImg, coordBats.getX() + batsShift,
           coordBats.getY() + batsShift, this);
     }
 
@@ -169,23 +170,28 @@ public class SwingPanel extends JPanel {
     g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
         coordPlayer.getY() + playerShift, this);
 
+    if (shoot == true){
+      Coordinates coordTarget = getCoordinates(this.targetLoc, 0);
+      g2d.drawImage(this.targetImg, coordTarget.getX(),
+          coordTarget.getY(), this);
+    }
   }
 
   private BufferedImage getImage(int numDoors, List<Direction> directions) throws IllegalArgumentException{
     switch(numDoors) {
       case 1:
-        return this.roombase_1;
+        return this.roombase_1Img;
       case 2:
         if ((directions.contains(Direction.NORTH) && directions.contains(Direction.SOUTH))
           || (directions.contains(Direction.EAST) && directions.contains(Direction.WEST))){
-          return this.hallway_straight;
+          return this.hallway_straightImg;
         } else {
-          return this.hallway;
+          return this.hallwayImg;
         }
       case 3:
-        return this.roombase_3;
+        return this.roombase_3Img;
       case 4:
-        return this.roombase_4;
+        return this.roombase_4Img;
       default:
         throw new IllegalArgumentException("No such number of doors");
     }
@@ -262,4 +268,9 @@ public class SwingPanel extends JPanel {
     repaint();
   }
 
+  public void repaintTarget(Room targetLoc) {
+    this.shoot = true;
+    this.targetLoc = targetLoc;
+    repaint();
+  }
 }
