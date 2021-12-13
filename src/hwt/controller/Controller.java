@@ -116,6 +116,8 @@ public class Controller implements ActionListener {
       view.repaintPlayer(afterLoc);
       checkAdjacentCaves(afterLoc);
       checkMoveForHazards(afterLoc);
+      //in case superbats worked
+      view.repaintPlayer(player.getLocation());
     }
     boolean shoot = input.getShootStatus();
 
@@ -123,7 +125,7 @@ public class Controller implements ActionListener {
       if (firstPaint){
         Room targetLoc = player.getLocation();
         target = new Player(targetLoc);
-        view.repaintTarget(targetLoc);
+        view.paintTarget(targetLoc);
         firstPaint = false;
       }
       else {
@@ -132,7 +134,7 @@ public class Controller implements ActionListener {
         input.resetShootDirection();
         target.moveByRooms(targetLoc, shootDir);
         targetLoc = target.getLocation();
-        view.repaintTarget(targetLoc);
+        view.paintTarget(targetLoc);
       }
     }
   }
@@ -360,13 +362,11 @@ public class Controller implements ActionListener {
       String messageBatsWorked = "Snatch - you are grabbed by superbats";
       if (randomIdx == 1) {
         printMessage(messageBatsWorked, "");
-
         ArrayList<Room> roomsWithCaves = maze.getRoomsWithCaves();
         //generate newRoomId
         randomIdx = rand.nextInt(roomsWithCaves.size());
         Room newRoom = roomsWithCaves.get(randomIdx);
         player.setLocation(newRoom);
-        view.repaintPlayer(newRoom);
         checkMoveForHazards(newRoom);
         return true;
       }

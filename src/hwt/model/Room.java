@@ -122,6 +122,81 @@ public class Room {
   }
 
   /**
+   * findNorthRoomId() calculates adjacent room Id to the north
+   */
+  private int findNorthRoomId(int numRows, int numCols){
+    int adjacentId;
+    int currentId = this.getId();
+    if (this.getRowId() > 0) {
+      adjacentId = currentId - numCols;
+    } else {
+      adjacentId = currentId + (numRows - 1) * numCols;
+    }
+    return adjacentId;
+  }
+
+  /**
+   * findSouthRoomId() calculates adjacent room Id to the south
+   */
+  private int findSouthRoomId(int numRows, int numCols){
+    int adjacentId;
+    int currentId = this.getId();
+    if (this.getRowId() < numRows - 1) {
+      adjacentId = currentId + numCols;
+    } else {
+      adjacentId = currentId - (numRows - 1) * numCols;
+    }
+    return adjacentId;
+  }
+
+  /**
+   * findEastRoomId() calculates adjacent room Id to the east
+   */
+  private int findEastRoomId(int numCols){
+    int adjacentId;
+    int currentId = this.getId();
+    if (this.getColId() < numCols - 1) {
+      adjacentId = currentId + 1;
+    } else {
+      adjacentId = currentId - (numCols - 1);
+    }
+    return adjacentId;
+  }
+
+  /**
+   * findWestRoomId() calculates adjacent room Id to the west
+   */
+  private int findWestRoomId(int numCols){
+    int adjacentId;
+    int currentId = this.getId();
+    if (this.getColId() > 0) {
+      adjacentId = currentId - 1;
+    } else {
+      adjacentId = currentId + (numCols - 1);
+    }
+    return adjacentId;
+  }
+
+  /**
+   * findAdjacentRoomId() returns id of the adjacent room in the given direction from current room
+   */
+  public int findAdjacentRoomId(Direction direction, int numRows, int numCols) {
+    int adjacentId;
+    if (direction == Direction.NORTH) {
+      adjacentId = findNorthRoomId(numRows, numCols);
+    } else if (direction == Direction.SOUTH) {
+      adjacentId = findSouthRoomId(numRows, numCols);
+    } else if (direction == Direction.EAST) {
+      adjacentId = findEastRoomId(numCols);
+    }
+    //Direction WEST
+    else {
+      adjacentId = findWestRoomId(numCols);
+    }
+    return adjacentId;
+  }
+
+  /**
    * findAdjacentCave() returns id of the adjacent cave in the given direction from current cave
    * extracts information from a hash map with direction as key and adjacent cave as value
    * Note: ignores rooms with tunnels

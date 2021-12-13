@@ -255,8 +255,8 @@ public abstract class PerfectMaze implements Maze {
       destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
 
       //update array of adjacent rooms
-      addAdjacentRooms(Direction.NORTH, source);
-      addAdjacentRooms(Direction.SOUTH, destination);
+      addAdjacentRooms(Direction.NORTH, sourceRoom);
+      addAdjacentRooms(Direction.SOUTH, destinationRoom);
 
     }
     //inner walls logic
@@ -272,8 +272,8 @@ public abstract class PerfectMaze implements Maze {
       destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
 
       //update array of adjacent rooms
-      addAdjacentRooms(Direction.EAST, source);
-      addAdjacentRooms(Direction.WEST, destination);
+      addAdjacentRooms(Direction.EAST, sourceRoom);
+      addAdjacentRooms(Direction.WEST, destinationRoom);
     }
     //wrapping walls logic
     else if (source + numCols - 1 == destination){
@@ -288,8 +288,8 @@ public abstract class PerfectMaze implements Maze {
       destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
 
       //update array of adjacent rooms
-      addAdjacentRooms(Direction.WEST, source);
-      addAdjacentRooms(Direction.EAST, destination);
+      addAdjacentRooms(Direction.WEST, sourceRoom);
+      addAdjacentRooms(Direction.EAST, destinationRoom);
 
     }
     //wrapping walls logic
@@ -305,8 +305,8 @@ public abstract class PerfectMaze implements Maze {
       destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
 
       //update array of adjacent rooms
-      addAdjacentRooms(Direction.NORTH, source);
-      addAdjacentRooms(Direction.SOUTH, destination);
+      addAdjacentRooms(Direction.NORTH, sourceRoom);
+      addAdjacentRooms(Direction.SOUTH, destinationRoom);
 
     }
   }
@@ -472,86 +472,17 @@ public abstract class PerfectMaze implements Maze {
     }
 
   }
-  /**
-   * moveNorth() calculates adjacent room Id to the north
-   */
-  private int moveNorth(int currentId){
-    int adjacentId;
-    if (rooms.get(currentId).getRowId() > 0) {
-      adjacentId = currentId - numCols;
-    } else {
-      adjacentId = currentId + (numRows - 1) * numCols;
-    }
-    return adjacentId;
-  }
 
-  /**
-   * moveSouth() calculates adjacent room Id to the south
-   */
-  private int moveSouth(int currentId){
-    int adjacentId;
-    if (rooms.get(currentId).getRowId() < numRows - 1) {
-      adjacentId = currentId + numCols;
-    } else {
-      adjacentId = currentId - (numRows - 1) * numCols;
-    }
-    return adjacentId;
-  }
-
-  /**
-   * moveEast() calculates adjacent room Id to the east
-   */
-  private int moveEast(int currentId){
-    int adjacentId;
-    if (rooms.get(currentId).getColId() < numCols - 1) {
-      adjacentId = currentId + 1;
-    } else {
-      adjacentId = currentId - (numCols - 1);
-    }
-    return adjacentId;
-  }
-
-  /**
-   * moveWest() calculates adjacent room Id to the west
-   */
-  private int moveWest(int currentId){
-    int adjacentId;
-    if (rooms.get(currentId).getColId() > 0) {
-      adjacentId = currentId - 1;
-    } else {
-      adjacentId = currentId + (numCols - 1);
-    }
-    return adjacentId;
-  }
-
-  /**
-   * findAdjacentRoomId() returns id of the adjacent room in the given direction from current room
-   */
-  public int findAdjacentRoomId(Direction direction, int currentId) {
-    int adjacentId;
-    if (direction == Direction.NORTH) {
-      adjacentId = moveNorth(currentId);
-    } else if (direction == Direction.SOUTH) {
-      adjacentId = moveSouth(currentId);
-    } else if (direction == Direction.EAST) {
-      adjacentId = moveEast(currentId);
-    }
-    //Direction WEST
-    else {
-      adjacentId = moveWest(currentId);
-    }
-    return adjacentId;
-  }
 
 
   /**
    * addAdjacentRooms() - helper function that adds a room to a list of adjacent rooms
    * when the maze is built
    */
-  private void addAdjacentRooms(Direction direction, int currentId){
-    int adjacentRoomId = findAdjacentRoomId(direction, currentId);
+  private void addAdjacentRooms(Direction direction, Room currentRoom){
+    int adjacentRoomId = currentRoom.findAdjacentRoomId(direction, numRows, numCols);
     Room adjacentRoom = rooms.get(adjacentRoomId);
-    rooms.get(currentId).getAdjacentRooms().add(adjacentRoom);
+    currentRoom.getAdjacentRooms().add(adjacentRoom);
   }
 
   /**
@@ -566,7 +497,7 @@ public abstract class PerfectMaze implements Maze {
     for (Room cave : roomsWithCaves ){
       for (Direction direction : cave.getDirections()){
         followedDirection = direction;
-        newRoomId = findAdjacentRoomId(direction, cave.getId());
+        newRoomId = cave.findAdjacentRoomId(direction, numRows, numCols);
         Room newRoom = rooms.get(newRoomId);
           while (newRoom.getType() == RoomType.TUNNEL) {
             //follow down the tunnel
@@ -577,7 +508,7 @@ public abstract class PerfectMaze implements Maze {
               //e.g. if we went north, we don't want to go south from new location
               //opposite of south is north, so if north == north, we don't go south
               if (direction != opposite){
-                newRoomId = findAdjacentRoomId(followDirection, newRoom.getId());
+                newRoomId = newRoom.findAdjacentRoomId(followDirection, numRows, numCols);
                 newRoom = rooms.get(newRoomId);
                 //when we found a cave, exit the loop
                 if (newRoom.getType() == RoomType.CAVE){

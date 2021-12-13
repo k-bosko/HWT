@@ -10,5 +10,5 @@ public interface View {
       List<Room> cavesNearbyPits, List<Room> cavesNearbyWumpus, Room playerLoc);
 
   void repaintPlayer(Room playerLoc);
-  void repaintTarget(Room targetLoc);
+  void paintTarget(Room targetLoc);
 }
