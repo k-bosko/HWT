@@ -57,22 +57,24 @@ public class Driver {
     Player player = new Player(startCave, numArrows);
 
     //switch between GUI and TEXT game modes
-    StartType gameType = StartType.GUI;
+    GameType gameType = GameType.GUI;
 
-    if (gameType == StartType.GUI){
+    //    maze.printWalls();
+//    maze.printRoomsInfo();
+
+    if (gameType == GameType.GUI){
       GameInput input = new KeyBoardHandler();
       View view = new SwingView(input);
 
       Controller c = new Controller(maze, player, view, input);
-      c.start(StartType.GUI);
+      c.start(GameType.GUI);
     }
     else {
       Controller c = new Controller(maze, player);
-      c.start(StartType.TEXT);
+      c.start(GameType.TEXT);
     }
 
-//    maze.printWalls();
-//    maze.printRoomsInfo();
+
 
 
   }

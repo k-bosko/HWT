@@ -61,18 +61,18 @@ public class Player {
     }
   }
 
-//  /**
-//   * moveByRoom() sets the new player location after moving east/west/north/south to a respective room
-//   * irrespective if it's Tunnel or
-//   * utilizes ArrayList<HashMap> directionsToAdjacentRooms saved for every Room
-//   * to be used in GUI game mode (bc we need to reveal map room by room)
-//   */
-//  public void moveByRooms(Room currentCave, Direction direction){
-//    for (HashMap<Direction, Room> directionHashMap: currentCave.getDirectionsToAdjacentRooms()){
-//      if (directionHashMap.containsKey(direction)){
-//        this.location = directionHashMap.get(direction);
-//      }
-//    }
-//  }
+  /**
+   * moveByRoom() sets the new player location after moving east/west/north/south to a respective room
+   * irrespective if it's Tunnel or
+   * utilizes ArrayList<HashMap> directionsToAdjacentRooms saved for every Room
+   * to be used in GUI game mode (bc we need to reveal map room by room)
+   */
+  public void moveByRooms(Room currentCave, Direction direction){
+    for (HashMap<Direction, Room> directionHashMap: currentCave.getDirectionsToAdjacentRooms()){
+      if (directionHashMap.containsKey(direction)){
+        this.location = directionHashMap.get(direction);
+      }
+    }
+  }
 
 }

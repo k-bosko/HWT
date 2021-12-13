@@ -1,6 +1,6 @@
 package hwt;
 
-public enum StartType {
+public enum GameType {
   GUI,
   TEXT
 }

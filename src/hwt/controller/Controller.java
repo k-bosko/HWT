@@ -1,7 +1,7 @@
 package hwt.controller;
 
 import hwt.Parameters;
-import hwt.StartType;
+import hwt.GameType;
 import hwt.model.CaveType;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
@@ -27,7 +27,7 @@ public class Controller implements ActionListener {
   private Timer timer = null;
   private boolean wumpusKilled = false;
 
-  private StartType type;
+  private GameType gameType;
   private Room caveWithWumpus;
   private ArrayList<Room> cavesWithPits;
   private ArrayList<Room> cavesWithBats;
@@ -62,15 +62,16 @@ public class Controller implements ActionListener {
   }
 
 
-  public void start(StartType type){
-    this.type = type;
-    if (type == StartType.GUI){
+  public void start(GameType type){
+    this.gameType = type;
+    if (type == GameType.GUI){
       this.startGUI();
     }
     else {
       this.startText();
     }
   }
+
   public void startText(){
     System.out.println("===============================================");
     System.out.println("WELCOME to HUNT THE WUMPUS!");
@@ -101,7 +102,7 @@ public class Controller implements ActionListener {
     Direction targetDir = input.getDirection();
     //need to reset direction to null because we use Timer, otherwise will move constantly in 1 direction
     input.resetDirection();
-    player.moveByCaves(beforeLoc, targetDir);
+    player.moveByRooms(beforeLoc, targetDir);
     Room afterLoc = player.getLocation();
     //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
     //only if the player location changed
@@ -290,6 +291,7 @@ public class Controller implements ActionListener {
       System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
     }
   }
+
   /**
    * checkMoveForHazards() checks if there is wumpus, superbats or pit in a cave the player moved to
    * prints respective messages to the user
@@ -353,9 +355,9 @@ public class Controller implements ActionListener {
   }
 
   public void printMessage(String message, String title){
-    if (type == StartType.TEXT){
+    if (gameType == GameType.TEXT){
       System.out.println(message);
-      System.out.println(title);
+      System.out.print(title);
     }
     else {
       DialogBox.createDialogBox(message, title);

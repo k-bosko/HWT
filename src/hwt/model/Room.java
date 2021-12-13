@@ -16,25 +16,20 @@ public class Room {
   private int id;
   private int rowId;
   private int colId;
-  private int numDoors;
   private RoomType type;
   private ArrayList<Direction> directions = new ArrayList<>();
   private ArrayList<CaveType> caveType = new ArrayList<>();
   private ArrayList<Room> adjacentRooms = new ArrayList<>();
   private ArrayList<Room> adjacentCaves = new ArrayList<>();
   private ArrayList<HashMap> directionsToAdjacentCaves = new ArrayList<>();
+  private ArrayList<HashMap> directionsToAdjacentRooms = new ArrayList<>();
 
   public Room(int id){
     this.id = id;
-    this.numDoors = 0;
-  }
-
-  public void increaseNumDoors(){
-    this.numDoors++;
   }
 
   public int getNumDoors(){
-    return this.numDoors;
+    return this.directions.size();
   }
 
   /**
@@ -122,6 +117,10 @@ public class Room {
     return this.directionsToAdjacentCaves;
   }
 
+  public ArrayList<HashMap> getDirectionsToAdjacentRooms(){
+    return this.directionsToAdjacentRooms;
+  }
+
   /**
    * findAdjacentCave() returns id of the adjacent cave in the given direction from current cave
    * extracts information from a hash map with direction as key and adjacent cave as value
@@ -147,20 +146,22 @@ public class Room {
         sb.append("\ncave type: ");
         this.getCaveType().forEach(ct -> sb.append(ct).append(" "));
       }
-      sb.append("\ndirections to adjacent caves as hash map:\n");
-      for (HashMap<Direction, Room> directionRoomHashMap : this.getDirectionsToAdjacentCaves()){
-        for (Direction directionAsKey : directionRoomHashMap.keySet()){
+      sb.append("\ndirections to adjacent CAVES (no tunnels):\n");
+      for (HashMap<Direction, Room> directionCaveHashMap : this.getDirectionsToAdjacentCaves()){
+        for (Direction directionAsKey : directionCaveHashMap.keySet()){
           sb.append("    ").append(directionAsKey).append(" : ");
-          sb.append(directionRoomHashMap.get(directionAsKey).getId());
+          sb.append(directionCaveHashMap.get(directionAsKey).getId());
         }
       }
     }
-    if (this.getType() == RoomType.TUNNEL){
-      sb.append("\nadjacent rooms: ");
-      this.getAdjacentRooms().forEach(r -> sb.append("   ").append(r.getId()));
-      sb.append("\ndirections: ");
-      this.getDirections().forEach(d -> sb.append("   ").append(d));
+    sb.append("\ndirections to adjacent ROOMS (tunnels or caves):\n");
+    for (HashMap<Direction, Room> directionRoomHashMap : this.getDirectionsToAdjacentRooms()){
+      for (Direction directionAsKey : directionRoomHashMap.keySet()){
+        sb.append("    ").append(directionAsKey).append(" : ");
+        sb.append(directionRoomHashMap.get(directionAsKey).getId());
+      }
     }
+
     return sb.toString();
   }
 }

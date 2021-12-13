@@ -239,17 +239,24 @@ public abstract class PerfectMaze implements Maze {
   private void updateRoomsInfo(int source, int destination){
     Room sourceRoom = rooms.get(source);
     Room destinationRoom = rooms.get(destination);
+    HashMap<Direction, Room> hmSource = new HashMap<>();
+    HashMap<Direction, Room> hmDestination = new HashMap<>();
+
     //inner walls logic
     if (source - numCols == destination){
       //update directions which is ArrayList
       sourceRoom.getDirections().add(Direction.NORTH);
       destinationRoom.getDirections().add(Direction.SOUTH);
+
+      //update directions as HashMap
+      hmSource.put(Direction.NORTH, destinationRoom);
+      sourceRoom.getDirectionsToAdjacentRooms().add(hmSource);
+      hmDestination.put(Direction.SOUTH, sourceRoom);
+      destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
+
       //update array of adjacent rooms
       addAdjacentRooms(Direction.NORTH, source);
       addAdjacentRooms(Direction.SOUTH, destination);
-      //every removed wall is a door
-      sourceRoom.increaseNumDoors();
-      destinationRoom.increaseNumDoors();
 
     }
     //inner walls logic
@@ -257,36 +264,50 @@ public abstract class PerfectMaze implements Maze {
       //update directions
       sourceRoom.getDirections().add(Direction.EAST);
       destinationRoom.getDirections().add(Direction.WEST);
+
+      //update directions as HashMap
+      hmSource.put(Direction.EAST, destinationRoom);
+      sourceRoom.getDirectionsToAdjacentRooms().add(hmSource);
+      hmDestination.put(Direction.WEST, sourceRoom);
+      destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
+
       //update array of adjacent rooms
       addAdjacentRooms(Direction.EAST, source);
       addAdjacentRooms(Direction.WEST, destination);
-      //every removed wall is a door
-      sourceRoom.increaseNumDoors();
-      destinationRoom.increaseNumDoors();
     }
     //wrapping walls logic
     else if (source + numCols - 1 == destination){
       //update directions
       sourceRoom.getDirections().add(Direction.WEST);
       destinationRoom.getDirections().add(Direction.EAST);
+
+      //update directions as HashMap
+      hmSource.put(Direction.WEST, destinationRoom);
+      sourceRoom.getDirectionsToAdjacentRooms().add(hmSource);
+      hmDestination.put(Direction.EAST, sourceRoom);
+      destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
+
       //update array of adjacent rooms
       addAdjacentRooms(Direction.WEST, source);
       addAdjacentRooms(Direction.EAST, destination);
-      //every removed wall is a door
-      sourceRoom.increaseNumDoors();
-      destinationRoom.increaseNumDoors();
+
     }
     //wrapping walls logic
     else if (source + (numRows-1) * numCols == destination){
       //update directions
       sourceRoom.getDirections().add(Direction.NORTH);
       destinationRoom.getDirections().add(Direction.SOUTH);
+
+      //update directions as HashMap
+      hmSource.put(Direction.NORTH, destinationRoom);
+      sourceRoom.getDirectionsToAdjacentRooms().add(hmSource);
+      hmDestination.put(Direction.SOUTH, sourceRoom);
+      destinationRoom.getDirectionsToAdjacentRooms().add(hmDestination);
+
       //update array of adjacent rooms
       addAdjacentRooms(Direction.NORTH, source);
       addAdjacentRooms(Direction.SOUTH, destination);
-      //every removed wall is a door
-      sourceRoom.increaseNumDoors();
-      destinationRoom.increaseNumDoors();
+
     }
   }
 
