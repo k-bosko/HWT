@@ -122,7 +122,6 @@ public class SwingPanel extends JPanel {
     //show maze room by room
     for (int i = 0; i < this.rooms.size(); i++){
       Room currentRoom = rooms.get(i);
-        //TODO implement in Room visited; all false in constructor
 //      if ( !currentRoom.isVisited() ) {
 //        continue;
 //      }
@@ -138,31 +137,45 @@ public class SwingPanel extends JPanel {
       g2d.drawImage(img, t, this);
     }
 
+
     for (int i = 0; i < this.cavesWithPits.size(); i++){
-      Coordinates coordPit = getCoordinates(this.cavesWithPits.get(i), 0);
-      g2d.drawImage(this.pitImg, coordPit.getX(), coordPit.getY(), this);
+      Room caveWithPit = this.cavesWithPits.get(i);
+//      if ( caveWithPit.isVisited() ) {
+        Coordinates coordPit = getCoordinates(caveWithPit, 0);
+        g2d.drawImage(this.pitImg, coordPit.getX(), coordPit.getY(), this);
+//      }
     }
 
-    Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
-    int wumpusShift = (Parameters.ROOM_SIZE - Parameters.WUMPUS_SIZE)/2;
-    g2d.drawImage(this.wumpusImg, coordWumpus.getX() + wumpusShift,
-        coordWumpus.getY() + wumpusShift, this);
+//    if ( caveWithWumpus.isVisited() ) {
+      Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
+      int wumpusShift = (Parameters.ROOM_SIZE - Parameters.WUMPUS_SIZE) / 2;
+      g2d.drawImage(this.wumpusImg, coordWumpus.getX() + wumpusShift,
+          coordWumpus.getY() + wumpusShift, this);
+//    }
 
    for (Room caveNearbyWumpus: this.cavesNearbyWumpus){
-      Coordinates coordCaveNearbyWumpus = getCoordinates(caveNearbyWumpus, 0);
-      g2d.drawImage(this.wumpusNearbyImg, coordCaveNearbyWumpus.getX(), coordCaveNearbyWumpus.getY(), this);
+//     if ( caveNearbyWumpus.isVisited() ) {
+       Coordinates coordCaveNearbyWumpus = getCoordinates(caveNearbyWumpus, 0);
+       g2d.drawImage(this.wumpusNearbyImg, coordCaveNearbyWumpus.getX(),
+           coordCaveNearbyWumpus.getY(), this);
+//     }
     }
 
    for (Room caveNearbyPit: this.cavesNearbyPits){
-     Coordinates coordCaveNearbyPit = getCoordinates(caveNearbyPit, 0);
-     g2d.drawImage(this.pitNearbyImg, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
+//     if ( caveNearbyPit.isVisited() ) {
+       Coordinates coordCaveNearbyPit = getCoordinates(caveNearbyPit, 0);
+       g2d.drawImage(this.pitNearbyImg, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
+//     }
    }
 
     for (int i = 0; i < this.cavesWithBats.size(); i++){
-      Coordinates coordBats = getCoordinates(this.cavesWithBats.get(i), 0);
-      int batsShift = (Parameters.ROOM_SIZE - Parameters.BATS_SIZE)/2;
-      g2d.drawImage(this.superbatsImg, coordBats.getX() + batsShift,
-          coordBats.getY() + batsShift, this);
+      Room caveWithBats = this.cavesWithBats.get(i);
+//      if ( caveWithBats.isVisited() ){
+        Coordinates coordBats = getCoordinates(caveWithBats, 0);
+        int batsShift = (Parameters.ROOM_SIZE - Parameters.BATS_SIZE)/2;
+        g2d.drawImage(this.superbatsImg, coordBats.getX() + batsShift,
+            coordBats.getY() + batsShift, this);
+//      }
     }
 
     Coordinates coordPlayer = getCoordinates(this.playerLoc, 0);
@@ -278,7 +291,7 @@ public class SwingPanel extends JPanel {
 
   public void paintAfterShooting(Room revealRoom){
     this.shoot = false;
-//    this.revealRoomAfterShooting = revealRoom; //TODO maybe reveal a room
+    revealRoom.setVisited(true); //TODO maybe reveal a room
     repaint();
   }
 

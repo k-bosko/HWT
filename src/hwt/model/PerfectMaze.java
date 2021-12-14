@@ -257,7 +257,6 @@ public abstract class PerfectMaze implements Maze {
       //update array of adjacent rooms
       addAdjacentRooms(Direction.NORTH, sourceRoom);
       addAdjacentRooms(Direction.SOUTH, destinationRoom);
-
     }
     //inner walls logic
     else if (source + 1 == destination){
@@ -290,7 +289,6 @@ public abstract class PerfectMaze implements Maze {
       //update array of adjacent rooms
       addAdjacentRooms(Direction.WEST, sourceRoom);
       addAdjacentRooms(Direction.EAST, destinationRoom);
-
     }
     //wrapping walls logic
     else if (source + (numRows-1) * numCols == destination){
@@ -307,7 +305,6 @@ public abstract class PerfectMaze implements Maze {
       //update array of adjacent rooms
       addAdjacentRooms(Direction.NORTH, sourceRoom);
       addAdjacentRooms(Direction.SOUTH, destinationRoom);
-
     }
   }
 
@@ -397,7 +394,7 @@ public abstract class PerfectMaze implements Maze {
    */
   protected void determineRoomType(){
     for (int i = 0; i < mazeSize; i++) {
-      if (rooms.get(i).getAdjacentRooms().size() == 2) {
+      if (rooms.get(i).getNumDoors() == 2) {
         rooms.get(i).setType(RoomType.TUNNEL);
       } else {
         rooms.get(i).setType(RoomType.CAVE);
@@ -563,5 +560,26 @@ public abstract class PerfectMaze implements Maze {
       randomCave = this.roomsWithCaves.get(randomIdx);
     }
     this.start = this.roomsWithCaves.get(randomIdx).getId();
+  }
+
+  /**
+   * removeSomeAdditionalWallsFrom() removes walls from a provided list of walls
+   * until a constraint (which specifies the number of remaining walls) is met
+   * currently constraint is generated randomly
+   * constraint can't be bigger than the number of remaining walls in a perfect maze
+   * upon which room maze is built
+   * @param walls - a list of walls from which we need to remove some walls
+   */
+  protected void removeSomeAdditionalWallsFrom(ArrayList<Wall> walls){
+    Random rand = new Random(1212);
+    //constraint - how many walls should stay
+    int constraint = rand.nextInt(walls.size());
+    while (walls.size() != constraint){
+      // Obtain a number between [0 - Wall list size].
+      int randomIdx = rand.nextInt(walls.size());
+      Wall randomWall = walls.get(randomIdx);
+      unify(randomWall.source, randomWall.destination);
+      walls.remove(randomWall);
+    }
   }
 }

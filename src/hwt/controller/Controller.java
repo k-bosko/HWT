@@ -117,6 +117,7 @@ public class Controller implements ActionListener {
   public void actionPerformed(ActionEvent e) {
 
     Room beforeLoc = player.getLocation();
+    beforeLoc.setVisited(true);
     Direction moveDirection = input.getMoveDirection();
 
     //need to reset direction to null because we use Timer, otherwise will move constantly in 1 direction
@@ -126,6 +127,7 @@ public class Controller implements ActionListener {
     //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
     //only if the player location changed
     if (beforeLoc != afterLoc) {
+      afterLoc.setVisited(true);
       checkAdjacentCaves(afterLoc);
       checkMoveForHazards(afterLoc);
       //needs to come last in case superbats worked
@@ -173,7 +175,10 @@ public class Controller implements ActionListener {
       Room targetCave = findCaveAfterShooting(shotDirection, player.getLocation(), numCavesShot);
       checkCaveAfterShooting(targetCave);
       checkArrows();
-      view.paintAfterShooting(shootingTarget);
+      //targetCave can be null if user shooting into unreachable cave
+      if (targetCave != null){
+        view.paintAfterShooting(targetCave); //reveals target cave after shooting
+      }
       input.resetShooting();
       firstShootPaint = true;
     }
@@ -184,7 +189,7 @@ public class Controller implements ActionListener {
     }
 
     if (gameOver){
-      printMessage("Game Over", ""); //TODO change to reveal the whole map + paint game over
+      printMessage("Game Over", "");
       System.exit(0);
     }
   }

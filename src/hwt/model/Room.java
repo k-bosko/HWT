@@ -14,6 +14,7 @@ import java.util.HashMap;
  */
 public class Room {
   private int id;
+  private boolean visited;
   private int rowId;
   private int colId;
   private RoomType type;
@@ -26,6 +27,15 @@ public class Room {
 
   public Room(int id){
     this.id = id;
+    this.visited = false;
+  }
+
+  public boolean isVisited(){
+    return this.visited;
+  }
+
+  public void setVisited(boolean value){
+    this.visited = value;
   }
 
   public int getNumDoors(){
