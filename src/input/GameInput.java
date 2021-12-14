@@ -10,4 +10,6 @@ public interface GameInput {
   boolean isKeyboard();
   void resetMoveDirection();
   void resetShootDirection();
+  boolean isShot();
+  void resetShooting();
 }

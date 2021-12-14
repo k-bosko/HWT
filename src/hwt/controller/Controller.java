@@ -26,16 +26,18 @@ public class Controller implements ActionListener {
   private GameInput input = null;
   private Timer timer = null;
   private boolean gameOver = false;
-  private boolean firstPaint = true;
+  private boolean firstShootPaint = true;
 
   private GameType gameType;
-  private Room caveWithWumpus;
-  private ArrayList<Room> cavesWithPits;
-  private ArrayList<Room> cavesWithBats;
-  private ArrayList<Room> cavesNearbyPits;
-  private ArrayList<Room> cavesNearbyWumpus;
-  private ArrayList<Room> rooms;
-  private Player target;
+  private final Room caveWithWumpus;
+  private final ArrayList<Room> cavesWithPits;
+  private final ArrayList<Room> cavesWithBats;
+  private final ArrayList<Room> cavesNearbyPits;
+  private final ArrayList<Room> cavesNearbyWumpus;
+  private final ArrayList<Room> rooms;
+  private Room shootingTarget;
+  private Direction shotDirection;
+  private int numCavesShot;
 
   //constructor for TEXT game mode
   public Controller(PerfectMaze maze, Player player){
@@ -113,6 +115,7 @@ public class Controller implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent e) {
+
     Room beforeLoc = player.getLocation();
     Direction moveDirection = input.getMoveDirection();
 
@@ -129,25 +132,59 @@ public class Controller implements ActionListener {
       view.repaintPlayer(player.getLocation());
     }
     boolean shoot = input.getShootStatus();
-
+    boolean shot = input.isShot();
+    //user pressed "s" to enter shoot mode
     if (shoot) {
-      if (firstPaint){
-        Room targetLoc = player.getLocation();
-        target = new Player(targetLoc);
-        view.paintTarget(targetLoc);
-        firstPaint = false;
-      }
-      else {
-        Room targetLoc = target.getLocation();
+      //target appears in location where player is
+      if (firstShootPaint) {
+        shootingTarget = player.getLocation();
+        view.paintTarget(shootingTarget);
+        firstShootPaint = false;
+        //target moves independent of player location
+      } else {
         Direction shootDir = input.getShootDirection();
+        //need to reset shoot direction, otherwise will be moving in one direction all the time
         input.resetShootDirection();
-        target.moveByRooms(targetLoc, shootDir);
-        targetLoc = target.getLocation();
-        view.paintTarget(targetLoc);
+        int adjacentRoomId = shootingTarget.findAdjacentRoomId(shootDir, maze.getNumRows(),
+            maze.getNumCols());
+        // findAdjacentRoomId() returns sentinel value - Integer.MIN_VALUE - when no Direction specified
+        if (adjacentRoomId != Integer.MIN_VALUE) {
+          Room newTargetRoom = rooms.get(adjacentRoomId);
+          //make sure that target is moving only horizontally or vertically
+          int playerRowId = player.getLocation().getRowId();
+          int playerColId = player.getLocation().getColId();
+          if ((newTargetRoom.getRowId() == playerRowId &&
+              (shootDir == Direction.WEST || shootDir == Direction.EAST)) ||
+              (newTargetRoom.getColId() == playerColId &&
+              (shootDir == Direction.NORTH || shootDir == Direction.SOUTH)) ){
+            view.paintTarget(newTargetRoom);
+            shootingTarget = newTargetRoom;
+            shotDirection = shootDir;
+            //take the larger number - one of them will be 0
+            // newRoom is either on the same rowId as player or same colId as player
+            numCavesShot = Math.max(Math.abs(newTargetRoom.getRowId()-playerRowId),
+                Math.abs(newTargetRoom.getColId()-playerColId));
+          }
+        }
       }
     }
+    //user chose the target and pressed "Enter", i.e. made a shot
+    if (shot) {
+      Room targetCave = findCaveAfterShooting(shotDirection, player.getLocation(), numCavesShot);
+      checkCaveAfterShooting(targetCave);
+      checkArrows();
+      view.paintAfterShooting(shootingTarget);
+      input.resetShooting();
+      firstShootPaint = true;
+    }
+    //user pressed ESC to exit shooting mode without making a shot
+    if (!shoot && !shot){
+      view.paintResetShoot();
+      firstShootPaint = true;
+    }
+
     if (gameOver){
-      printMessage("Game Over", ""); //TODO change to reveal the whole map
+      printMessage("Game Over", ""); //TODO change to reveal the whole map + paint game over
       System.exit(0);
     }
   }
@@ -204,124 +241,125 @@ public class Controller implements ActionListener {
   public void shootOrMove(Room currentCave){
     System.out.println("\nShoot [s] or Move [m]?");
     Scanner sc = new Scanner(System.in);
-    String input = sc.nextLine();
+    String inputShootOrMove = sc.nextLine();
     //if move
-    if (input.equals("m")){
+    if (inputShootOrMove.equals("m")){
       System.out.println("Where to?");
-      makeMove(currentCave);
+      Direction direction = readDirectionInput(sc);
+      makeMove(currentCave, direction);
       //update current cave after move
       currentCave = player.getLocation();
       checkMoveForHazards(currentCave);
-      //in case you get snatched away by superbats, update location
-//      currentCave = player.getLocation();
-//      System.out.println("You are now in cave #" + currentCave.getId());
     }
     //shoot
-    else if (input.equals("s")) {
-      //validate input for number of caves
-      boolean invalidInput = true;
-      int numCaves = 0;
-      while (invalidInput) {
-        System.out.println("No. of caves (1-5)?");
-        String cavesInput = sc.nextLine();
-        Matcher matcher = Parameters.PATTERN_DIGITS.matcher(cavesInput);
-        boolean matchFound = matcher.find();
-        if (matchFound) {
-          System.out.println("Your input is not a valid number");
-        } else {
-          numCaves = Integer.valueOf(cavesInput);
-          if (numCaves >= 1 && numCaves <= 5) {
-            invalidInput = false;
-          } else {
-            System.out.println("Can't shoot that number. Please enter a number between 1 and 5");
-          }
-        }
-      }
+    else if (inputShootOrMove.equals("s")) {
+      System.out.println("No. of caves (1-5)?");
+      int numCaves = readCavesInput(sc);
       System.out.println("In what direction?");
-      //validate input
-      invalidInput = true;
-      String directionInput = null;
-      while (invalidInput) {
-        directionInput = sc.nextLine();
-        if (directionInput.equals("n") ||
-            directionInput.equals("w") ||
-            directionInput.equals("e") ||
-            directionInput.equals("s") ||
-            directionInput.equals("q")) {
-          invalidInput = false;
-        } else {
-          System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
-        }
-      }
-      Room targetCave = currentCave;
-      for (int i = 0; i < numCaves; i++) {
-        if (directionInput.equals("s") && targetCave != null) {
-          targetCave = targetCave.findAdjacentCave(Direction.SOUTH);
-        } else if (directionInput.equals("n") && targetCave != null) {
-          targetCave = targetCave.findAdjacentCave(Direction.NORTH);
-        } else if (directionInput.equals("w") && targetCave != null) {
-          targetCave = targetCave.findAdjacentCave(Direction.WEST);
-        } else if (directionInput.equals("e") && targetCave != null) {
-          targetCave = targetCave.findAdjacentCave(Direction.EAST);
-        } else if (directionInput.equals("q")) {
-          System.out.println("Exiting the game");
-          System.exit(0);
-        }
-      }
-      //targetCave is null if player specified larger distance than an arrow can travel
-      if (targetCave != null) {
-        System.out.println("Your arrow reached cave #" + targetCave.getId());
-        if (targetCave.getCaveType().contains(CaveType.WUMPUS)) {
-          gameOver = true;
-          System.out.println("Hee hee hee, you got the wumpus!");
-          System.out.println("Next time you won't be so lucky\nGame Over");
-          System.exit(0);
-        } else {
-          System.out.println("You missed...");
-        }
-      } else {
-        System.out.println("You missed...");
-      }
-      player.decreaseArrows();
-      int numArrows = player.getNumArrows();
-      System.out.println("Your number of arrows is now: " + numArrows);
-      if (numArrows == 0) {
-        System.out.println("Oh no! You ran out of arrows...\nGame Over");
-//        System.exit(0);
-        gameOver = true;
-      }
-      if (numArrows == 1) {
-        System.out.println("Be careful! If you miss next time, you lose");
-      }
-    } else if (input.equals("q")){
-      System.out.println("Exiting the game");
-      System.exit(0);
+      Direction shootDirection = readDirectionInput(sc);
+      Room targetCave = findCaveAfterShooting(shootDirection, currentCave, numCaves);
+      checkCaveAfterShooting(targetCave);
+      checkArrows();
     } else {
       System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
     }
   }
 
-  /**
-   * makeMove() checks the input from the user for direction to move and moves the player
-   * to new location
-   * @param currentCave
-   */
-  public void makeMove(Room currentCave){
-    Scanner sc = new Scanner(System.in);
-    String input = sc.nextLine();
-    ArrayList<Direction> possibleMoves = currentCave.getDirections();
+  public void checkArrows(){
+    StringBuilder sb = new StringBuilder();
+    if (!gameOver){
+      player.decreaseArrows();
+      int numArrows = player.getNumArrows();
+      sb.append("Your number of arrows is now: ").append(numArrows);
+//      System.out.println("Your number of arrows is now: " + numArrows);
+      if (numArrows == 0) {
+        sb.append("\nOh no! You ran out of arrows...");
+//        System.out.println("Oh no! You ran out of arrows...");
+        gameOver = true;
+      }
+      if (numArrows == 1) {
+        sb.append("\nBe careful! If you miss next time, you lose");
+//        System.out.println("Be careful! If you miss next time, you lose");
+      }
+      printMessage(sb.toString(),"");
+    }
+  }
+  public void checkCaveAfterShooting(Room targetCave){
+    StringBuilder sb = new StringBuilder();
+    //targetCave is null if player specified larger distance than an arrow can travel
+    if (targetCave != null) {
+      sb.append("Your arrow reached cave #").append(targetCave.getId());
+//      System.out.println("Your arrow reached cave #" + targetCave.getId());
+      if (targetCave.getCaveType().contains(CaveType.WUMPUS)) {
+        gameOver = true;
+        sb.append("\nHee hee hee, you got the wumpus!");
+        sb.append("\nNext time you won't be so lucky");
+//        System.out.println("Hee hee hee, you got the wumpus!");
+//        System.out.println("Next time you won't be so lucky\nGame Over");
 
-    if (input.equals("n") && possibleMoves.contains(Direction.NORTH)){
-      player.moveByCaves(currentCave, Direction.NORTH);
+      } else {
+        sb.append("\nYou missed...");
+//        System.out.println("You missed...");
+      }
+    } else {
+      sb.append("\nYou missed...");
+//      System.out.println("You missed...");
     }
-    else if (input.equals("s") && possibleMoves.contains(Direction.SOUTH)){
-      player.moveByCaves(currentCave, Direction.SOUTH);
+    printMessage(sb.toString(), "");
+  }
+
+  private Direction readDirectionInput(Scanner sc) {
+    String directionInput;
+    while (true){
+      directionInput = sc.nextLine();
+      if (directionInput.equals("n") ||
+          directionInput.equals("w") ||
+          directionInput.equals("e") ||
+          directionInput.equals("s") ||
+          directionInput.equals("q")) {
+        break;
+      } else {
+        System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
+      }
     }
-    else if (input.equals("w") && possibleMoves.contains(Direction.WEST)){
-      player.moveByCaves(currentCave, Direction.WEST);
+    Direction direction = translateInputIntoDirection(directionInput);
+    return direction;
+  }
+
+  private int readCavesInput(Scanner sc){
+    int numCaves;
+
+    while (true){
+      String inputNumCaves = sc.nextLine();
+      Matcher matcher = Parameters.PATTERN_DIGITS.matcher(inputNumCaves);
+      boolean matchFound = matcher.find();
+      if (matchFound) {
+        System.out.println("Your input is not a valid number");
+      } else {
+        numCaves = Integer.valueOf(inputNumCaves);
+        if (numCaves >= 1 && numCaves <= 5) {
+          break;
+        } else {
+          System.out.println("Can't shoot that number. Please enter a number between 1 and 5");
+        }
+      }
     }
-    else if (input.equals("e") && possibleMoves.contains(Direction.EAST)){
-      player.moveByCaves(currentCave, Direction.EAST);
+    return numCaves;
+
+  }
+
+  private Direction translateInputIntoDirection(String input) {
+    if (input.equals("s")){
+      return Direction.SOUTH;
+    }
+    else if (input.equals("n")){
+      return Direction.NORTH;
+    }
+    else if (input.equals("w")){
+      return Direction.WEST;
+    }
+    else if (input.equals("e")){
+      return Direction.EAST;
     }
     else if (input.equals("q")){
       System.out.println("Exiting the game");
@@ -329,6 +367,29 @@ public class Controller implements ActionListener {
     }
     else {
       System.out.println("Illegal command. Please enter either e, w, s, n or q for exit");
+    }
+    return null;
+  }
+
+  public Room findCaveAfterShooting(Direction direction, Room targetCave, int numCaves){
+    for (int i = 0; i < numCaves; i++) {
+      if (targetCave != null && direction != null){
+        targetCave = targetCave.findAdjacentCave(direction);
+      }
+    }
+    return targetCave;
+  }
+
+  /**
+   * makeMove() checks if the move is possible in the provided direction,
+   *  if yes, moves the player to a new location
+   * @param currentCave
+   */
+  public void makeMove(Room currentCave, Direction direction){
+
+    ArrayList<Direction> possibleMoves = currentCave.getDirections();
+    if (possibleMoves.contains(direction)){
+      player.moveByCaves(currentCave, direction);
     }
   }
 
@@ -349,7 +410,6 @@ public class Controller implements ActionListener {
       String messagePit = "Oh no! You fell into the bottomless pit... Better luck next time";
       printMessage(messagePit, "Game Over");
       gameOver = true;
-//      System.exit(0);
     }
 
     //if entered a cave with wumpus and there are no superbats/superbats didn't work...
@@ -357,7 +417,6 @@ public class Controller implements ActionListener {
       String messageWumpus = "Chomp chomp chomp... Thank you for feeding the wumpus! Better luck next time";
       printMessage(messageWumpus, "Game Over");
       gameOver = true;
-//      System.exit(0);
     }
   }
 

@@ -57,7 +57,7 @@ public class Driver {
     Player player = new Player(startCave, numArrows);
 
     //switch between GUI and TEXT game modes
-    GameType gameType = GameType.TEXT;
+    GameType gameType = GameType.GUI;
 
     //    maze.printWalls();
 //    maze.printRoomsInfo();

@@ -11,4 +11,6 @@ public interface View {
 
   void repaintPlayer(Room playerLoc);
   void paintTarget(Room targetLoc);
+  void paintAfterShooting(Room revealRoom);
+  void paintResetShoot();
 }

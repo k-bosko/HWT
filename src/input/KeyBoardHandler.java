@@ -14,6 +14,7 @@ public class KeyBoardHandler implements KeyListener, GameInput {
   private Direction moveDirection;
   private Direction shootDirection;
   private boolean shoot = false;
+  private boolean shot = false;
 
   @Override
   public void keyTyped(KeyEvent e) {
@@ -30,6 +31,14 @@ public class KeyBoardHandler implements KeyListener, GameInput {
     }
     if (key == KeyEvent.VK_S) {
       this.shoot = true;
+    }
+    if (key == KeyEvent.VK_ENTER) {
+      this.shoot = false;
+      this.shot = true;
+    }
+    if (key == KeyEvent.VK_ESCAPE) {
+      this.shoot = false;
+      this.shot = false;
     }
     else {
       //ignore
@@ -65,6 +74,11 @@ public class KeyBoardHandler implements KeyListener, GameInput {
   }
 
   @Override
+  public boolean isShot(){
+    return this.shot;
+  }
+
+  @Override
   public Direction getShootDirection() {
     return this.shootDirection;
   }
@@ -76,10 +90,16 @@ public class KeyBoardHandler implements KeyListener, GameInput {
     return true;
   }
 
+  @Override
   public void resetMoveDirection(){
     this.moveDirection = null;
   }
+
+  @Override
   public void resetShootDirection(){
     this.shootDirection = null;
   }
+
+  @Override
+  public void resetShooting() {this.shot = false;}
 }

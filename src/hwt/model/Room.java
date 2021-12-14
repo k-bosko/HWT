@@ -124,7 +124,7 @@ public class Room {
   /**
    * findNorthRoomId() calculates adjacent room Id to the north
    */
-  private int findNorthRoomId(int numRows, int numCols){
+  public int findNorthRoomId(int numRows, int numCols){
     int adjacentId;
     int currentId = this.getId();
     if (this.getRowId() > 0) {
@@ -138,12 +138,13 @@ public class Room {
   /**
    * findSouthRoomId() calculates adjacent room Id to the south
    */
-  private int findSouthRoomId(int numRows, int numCols){
+  public int findSouthRoomId(int numRows, int numCols){
     int adjacentId;
     int currentId = this.getId();
     if (this.getRowId() < numRows - 1) {
       adjacentId = currentId + numCols;
     } else {
+      //for wrapping case
       adjacentId = currentId - (numRows - 1) * numCols;
     }
     return adjacentId;
@@ -152,7 +153,7 @@ public class Room {
   /**
    * findEastRoomId() calculates adjacent room Id to the east
    */
-  private int findEastRoomId(int numCols){
+  public int findEastRoomId(int numCols){
     int adjacentId;
     int currentId = this.getId();
     if (this.getColId() < numCols - 1) {
@@ -166,7 +167,7 @@ public class Room {
   /**
    * findWestRoomId() calculates adjacent room Id to the west
    */
-  private int findWestRoomId(int numCols){
+  public int findWestRoomId(int numCols){
     int adjacentId;
     int currentId = this.getId();
     if (this.getColId() > 0) {
@@ -189,9 +190,11 @@ public class Room {
     } else if (direction == Direction.EAST) {
       adjacentId = findEastRoomId(numCols);
     }
-    //Direction WEST
-    else {
+    else if (direction == Direction.WEST){
       adjacentId = findWestRoomId(numCols);
+    }
+    else {
+      adjacentId = Integer.MIN_VALUE;
     }
     return adjacentId;
   }
@@ -239,4 +242,5 @@ public class Room {
 
     return sb.toString();
   }
+
 }

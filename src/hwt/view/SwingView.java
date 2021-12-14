@@ -34,6 +34,12 @@ public class SwingView implements View {
   }
 
   public void paintTarget(Room targetLoc) {
-    panel.repaintTarget(targetLoc);
+    panel.paintTarget(targetLoc);
   }
+
+  public void paintAfterShooting(Room revealRoom){
+    panel.paintAfterShooting(revealRoom);
+  }
+
+  public void paintResetShoot(){ panel.paintResetShoot();}
 }

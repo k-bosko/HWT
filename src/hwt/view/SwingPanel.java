@@ -170,11 +170,12 @@ public class SwingPanel extends JPanel {
     g2d.drawImage(this.playerImg, coordPlayer.getX() + playerShift,
         coordPlayer.getY() + playerShift, this);
 
-    if (shoot == true){
+    if (shoot){
       Coordinates coordTarget = getCoordinates(this.targetLoc, 0);
       g2d.drawImage(this.targetImg, coordTarget.getX(),
           coordTarget.getY(), this);
     }
+
   }
 
   private BufferedImage getImage(int numDoors, List<Direction> directions) throws IllegalArgumentException{
@@ -268,9 +269,21 @@ public class SwingPanel extends JPanel {
     repaint();
   }
 
-  public void repaintTarget(Room targetLoc) {
+  public void paintTarget(Room targetLoc) {
     this.shoot = true;
     this.targetLoc = targetLoc;
+    repaint();
+  }
+
+
+  public void paintAfterShooting(Room revealRoom){
+    this.shoot = false;
+//    this.revealRoomAfterShooting = revealRoom; //TODO maybe reveal a room
+    repaint();
+  }
+
+  public void paintResetShoot(){
+    this.shoot = false;
     repaint();
   }
 }
