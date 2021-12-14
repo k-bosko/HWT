@@ -25,7 +25,7 @@ public class Controller implements ActionListener {
   private View view = null;
   private GameInput input = null;
   private Timer timer = null;
-  private boolean wumpusKilled = false;
+  private boolean gameOver = false;
   private boolean firstPaint = true;
 
   private GameType gameType;
@@ -81,22 +81,33 @@ public class Controller implements ActionListener {
     System.out.println("WELCOME to HUNT THE WUMPUS!");
     System.out.println("===============================================");
 
-    System.out.println("\nYou're in cave #" + maze.getStart());
+    System.out.println("\nYou're in a maze and your task is to kill a wumpus that lives in one of the caves.\n"
+        + "You can shoot the wumpus with your arrow.\n"
+        + "But remember - if you miss and run out of arrows, you lose!\n"
+        + "You can feel the wumpus in nearby caves.\n"
+        + "You can also lose if you fall into a bottomless pit which you can also feel from nearby caves.\n"
+        + "There are also caves with superbats. If you run into such a cave,\n"
+        + "there is a 50% chance that they grab you and move to a different cave.\n"
+        + "If there is a wumpus or bottomless pit in that cave, well, that's your fate!\n"
+        + "Good luck in hunting  down the wumpus!\n");
     System.out.println("Your current number of arrows: " + player.getNumArrows());
 
-    while (!wumpusKilled) {
+    while (!gameOver) {
       Room currentCave = player.getLocation();
+      System.out.println("You are in cave #" + currentCave.getId());
       checkAdjacentCaves(currentCave);
       printOptions(currentCave);
       shootOrMove(currentCave);
     }
+//    System.exit(0);
   }
   public void startGUI() {
-    Room playerLoc = player.getLocation();
 
+    Room playerLoc = player.getLocation();
     view.paint(rooms, caveWithWumpus,
         cavesWithBats, cavesWithPits, cavesNearbyPits, cavesNearbyWumpus, playerLoc);
     timer.start();
+
   }
 
 
@@ -112,11 +123,9 @@ public class Controller implements ActionListener {
     //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
     //only if the player location changed
     if (beforeLoc != afterLoc) {
-//      System.out.println("new location - " + afterLoc.getId());
-      view.repaintPlayer(afterLoc);
       checkAdjacentCaves(afterLoc);
       checkMoveForHazards(afterLoc);
-      //in case superbats worked
+      //needs to come last in case superbats worked
       view.repaintPlayer(player.getLocation());
     }
     boolean shoot = input.getShootStatus();
@@ -136,6 +145,10 @@ public class Controller implements ActionListener {
         targetLoc = target.getLocation();
         view.paintTarget(targetLoc);
       }
+    }
+    if (gameOver){
+      printMessage("Game Over", ""); //TODO change to reveal the whole map
+      System.exit(0);
     }
   }
 
@@ -200,8 +213,8 @@ public class Controller implements ActionListener {
       currentCave = player.getLocation();
       checkMoveForHazards(currentCave);
       //in case you get snatched away by superbats, update location
-      currentCave = player.getLocation();
-      System.out.println("You are now in cave #" + currentCave.getId());
+//      currentCave = player.getLocation();
+//      System.out.println("You are now in cave #" + currentCave.getId());
     }
     //shoot
     else if (input.equals("s")) {
@@ -259,7 +272,7 @@ public class Controller implements ActionListener {
       if (targetCave != null) {
         System.out.println("Your arrow reached cave #" + targetCave.getId());
         if (targetCave.getCaveType().contains(CaveType.WUMPUS)) {
-          wumpusKilled = true;
+          gameOver = true;
           System.out.println("Hee hee hee, you got the wumpus!");
           System.out.println("Next time you won't be so lucky\nGame Over");
           System.exit(0);
@@ -274,7 +287,8 @@ public class Controller implements ActionListener {
       System.out.println("Your number of arrows is now: " + numArrows);
       if (numArrows == 0) {
         System.out.println("Oh no! You ran out of arrows...\nGame Over");
-        System.exit(0);
+//        System.exit(0);
+        gameOver = true;
       }
       if (numArrows == 1) {
         System.out.println("Be careful! If you miss next time, you lose");
@@ -334,14 +348,16 @@ public class Controller implements ActionListener {
     if (currentCave.getCaveType().contains(CaveType.PIT) && !superbatsWorked){
       String messagePit = "Oh no! You fell into the bottomless pit... Better luck next time";
       printMessage(messagePit, "Game Over");
-      System.exit(0);
+      gameOver = true;
+//      System.exit(0);
     }
 
     //if entered a cave with wumpus and there are no superbats/superbats didn't work...
     if (currentCave.getCaveType().contains(CaveType.WUMPUS) && !superbatsWorked){
       String messageWumpus = "Chomp chomp chomp... Thank you for feeding the wumpus! Better luck next time";
       printMessage(messageWumpus, "Game Over");
-      System.exit(0);
+      gameOver = true;
+//      System.exit(0);
     }
   }
 
