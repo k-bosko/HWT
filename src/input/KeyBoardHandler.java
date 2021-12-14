@@ -32,11 +32,11 @@ public class KeyBoardHandler implements KeyListener, GameInput {
     if (key == KeyEvent.VK_S) {
       this.shoot = true;
     }
-    if (key == KeyEvent.VK_ENTER) {
+    if (this.shoot && key == KeyEvent.VK_ENTER) {
       this.shoot = false;
       this.shot = true;
     }
-    if (key == KeyEvent.VK_ESCAPE) {
+    if (this.shoot && key == KeyEvent.VK_ESCAPE) {
       this.shoot = false;
       this.shot = false;
     }
