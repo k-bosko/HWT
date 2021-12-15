@@ -1,16 +1,22 @@
 package hwt;
 
 import hwt.controller.Controller;
+import hwt.model.Maze;
 import hwt.model.MazeBuilder;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Room;
+import hwt.view.MenuPanel;
 import hwt.view.SwingView;
 import hwt.view.View;
 import input.GameInput;
 import input.KeyBoardHandler;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Driver {
+
+  private static MazeBuilder mazeBuilder;
 
   public static void main(String[] args) throws ArrayIndexOutOfBoundsException{
     //default for arrows
@@ -24,7 +30,7 @@ public class Driver {
     int numCols = Integer.parseInt(args[1]);
     String mazeType = args[2];
 
-    MazeBuilder mazeBuilder = new MazeBuilder(numRows, numCols, mazeType);
+    mazeBuilder = new MazeBuilder(numRows, numCols, mazeType);
     if (args.length == 4){
       int numPits = Integer.parseInt(args[3]);
       mazeBuilder.specifyPitsNumber(numPits);
@@ -46,33 +52,42 @@ public class Driver {
       mazeBuilder.specifyBatsNumber(numBats);
 
       numArrows = Integer.parseInt(args[5]);
-
     }
 
-    PerfectMaze maze = mazeBuilder.build();
+    MenuPanel menu = new MenuPanel();
+    menu.show();
 
-    //TODO rethink implementation of start ? -> 1. either change start from int to Room or 2. change Player constructor and move from Room to int
-    int start = maze.getStart();
-    Room startCave = maze.getRoomBy(start);
-    Player player = new Player(startCave, numArrows);
+    menu.getStartGameBtn().addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        menu.hide();
+        PerfectMaze maze = mazeBuilder.build();
 
-    //switch between GUI and TEXT game modes
-    GameType gameType = GameType.GUI;
+        //TODO rethink implementation of start ? -> 1. either change start from int to Room or 2. change Player constructor and move from Room to int
+        int start = maze.getStart();
+        Room startCave = maze.getRoomBy(start);
+        Player player = new Player(startCave, menu.getNumArrows());
 
-    //    maze.printWalls();
-//    maze.printRoomsInfo();
+        //switch between GUI and TEXT game modes
+        GameType gameType = GameType.GUI;
 
-    if (gameType == GameType.GUI){
-      GameInput input = new KeyBoardHandler();
-      View view = new SwingView(input);
+        //    maze.printWalls();
+        //    maze.printRoomsInfo();
 
-      Controller c = new Controller(maze, player, view, input);
-      c.start(GameType.GUI);
-    }
-    else {
-      Controller c = new Controller(maze, player);
-      c.start(GameType.TEXT);
-    }
+        if (gameType == GameType.GUI){
+          GameInput input = new KeyBoardHandler();
+          View view = new SwingView(input);
+
+          Controller c = new Controller(maze, player, view, input);
+          c.start(GameType.GUI);
+        }
+        else {
+          Controller c = new Controller(maze, player);
+          c.start(GameType.TEXT);
+        }
+      }
+    });
+
 
 
 
