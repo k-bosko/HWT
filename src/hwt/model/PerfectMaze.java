@@ -12,6 +12,7 @@ public abstract class PerfectMaze implements Maze {
   private int mazeSize;
   private int numRows;
   private int numCols;
+  private boolean isSeed;
   private ArrayList<Room> rooms = new ArrayList<>();
   protected ArrayList<Wall> wrappingWalls;
   protected ArrayList<Wall> remainingInnerWalls;
@@ -25,7 +26,8 @@ public abstract class PerfectMaze implements Maze {
   private ArrayList<Room> roomsWithCaves = new ArrayList<>();
 
 
-  public PerfectMaze(int numRows, int numCols, int numPits, int numBats){
+  public PerfectMaze(int numRows, int numCols, int numPits, int numBats, boolean isSeed){
+    this.isSeed = isSeed;
     this.numCols = numCols;
     this.numRows = numRows;
     this.mazeSize = numRows * numCols;
@@ -314,8 +316,13 @@ public abstract class PerfectMaze implements Maze {
    * @return wall
    */
   protected Wall pickRandomWall(ArrayList<Wall> walls){
-    //TODO remove seed to generate randomly - previous seed 12345
-    Random rand = new Random(1213145);
+    Random rand;
+    if (isSeed){
+      rand = new Random(1213145);
+    }
+   else {
+      rand = new Random();
+    }
     // Obtain a number between [0 - Wall list size].
     int randomIdx = rand.nextInt(walls.size());
     Wall randomWall = walls.get(randomIdx);
@@ -413,8 +420,13 @@ public abstract class PerfectMaze implements Maze {
     int bats = 0;
     int pits = 0;
     int wumpus = 0;
-    //add seed if you want the same result
-    Random rand = new Random(3781);
+    Random rand;
+    if (isSeed){
+      rand = new Random(3781);
+    }
+    else {
+      rand = new Random();
+    }
     int randomIdx;
 
     while (bats < this.numRoomsWithSuperbats) {
@@ -549,7 +561,14 @@ public abstract class PerfectMaze implements Maze {
    * is called when the maze is being built but after the cave types are assigned
    */
   public void recalibrateStart(){
-    Random rand = new Random(112);
+    Random rand;
+    if (isSeed){
+      rand = new Random(112);
+    }
+    else{
+      rand = new Random();
+    }
+
     int randomIdx = rand.nextInt(this.roomsWithCaves.size());
     Room randomCave = this.roomsWithCaves.get(randomIdx);
     //search for a cave without hazards to start
@@ -571,9 +590,16 @@ public abstract class PerfectMaze implements Maze {
    * @param walls - a list of walls from which we need to remove some walls
    */
   protected void removeSomeAdditionalWallsFrom(ArrayList<Wall> walls){
-    Random rand = new Random(1212);
+    Random rand;
+    if (isSeed){
+      rand = new Random(1212);
+    }
+    else {
+      rand = new Random();
+    }
     //constraint - how many walls should stay
     int constraint = rand.nextInt(walls.size());
+
     while (walls.size() != constraint){
       // Obtain a number between [0 - Wall list size].
       int randomIdx = rand.nextInt(walls.size());

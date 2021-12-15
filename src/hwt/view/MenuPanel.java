@@ -11,8 +11,10 @@ import java.awt.LayoutManager;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -42,12 +44,19 @@ public class MenuPanel {
   public MenuPanel(){
     frame = new JFrame();
     frame.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
-    GridLayout grid = new GridLayout(8, 1);
-    frame.setLayout(grid);
-    frame.setSize(450, 700);
+//    GridLayout grid = new GridLayout(8, 1);
+//    frame.setLayout(grid);
+    frame.setSize(450, 750);
+
+    JPanel mainPanel = new JPanel();
+    GridLayout grid = new GridLayout(9, 1);
+    mainPanel.setLayout(grid);
+    frame.add(mainPanel);
+
+    JPanel fakePanel = new JPanel();
+    mainPanel.add(fakePanel);
 
     JPanel lead = new JPanel();
-//    lead.setPreferredSize(new Dimension(450, 20));
     lead.setLayout(new FlowLayout(FlowLayout.CENTER));
     JLabel wumpusIcon = new JLabel(new ImageIcon("./img/wumpus.png"), JLabel.CENTER);
     lead.add(wumpusIcon);
@@ -55,12 +64,12 @@ public class MenuPanel {
     JLabel gameLabel = new JLabel("    Hunt The Wumpus", JLabel.CENTER);
     gameLabel.setFont(new Font("Serif", Font.BOLD, 24));
     lead.add(gameLabel);
-    frame.getContentPane().add(lead);
+    mainPanel.add(lead);
 
 
     JLabel mazeLabel = new JLabel("Set maze options: ", SwingConstants.CENTER);
     mazeLabel.setFont(new Font("Serif", Font.BOLD, 14));
-    frame.getContentPane().add(mazeLabel);
+    mainPanel.add(mazeLabel);
 
     //maze options
     JPanel mazeOptions = new JPanel();
@@ -82,21 +91,33 @@ public class MenuPanel {
 
 
     nonWrappingMazeRbtn = new JRadioButton("Non-wrapping maze", true);
+    nonWrappingMazeRbtn.setHorizontalAlignment(JRadioButton.RIGHT);
     wrappingMazeRbtn = new JRadioButton("Wrapping maze", false);
+
+    //Group the radio buttons.
+    ButtonGroup groupMazeType = new ButtonGroup();
+    groupMazeType.add(nonWrappingMazeRbtn);
+    groupMazeType.add(wrappingMazeRbtn);
 
     mazeOptions.add(nonWrappingMazeRbtn);
     mazeOptions.add(wrappingMazeRbtn);
 
     newMazeRbtn = new JRadioButton("New maze", false);
+    newMazeRbtn.setHorizontalAlignment(JRadioButton.RIGHT);
     seededMazeRbtn = new JRadioButton("Same maze", true);
+
+    //Group the radio buttons.
+    ButtonGroup groupMazeSeed = new ButtonGroup();
+    groupMazeSeed.add(newMazeRbtn);
+    groupMazeSeed.add(seededMazeRbtn);
 
     mazeOptions.add(newMazeRbtn);
     mazeOptions.add(seededMazeRbtn);
-    frame.getContentPane().add(mazeOptions);
+    mainPanel.add(mazeOptions);
 
     JLabel difficultyLabel = new JLabel("Set difficulty level: ", SwingConstants.CENTER);
     difficultyLabel.setFont(new Font("Serif", Font.BOLD, 14));
-    frame.getContentPane().add(difficultyLabel);
+    mainPanel.add(difficultyLabel);
 
 
     JPanel difficultyOptions = new JPanel();
@@ -125,16 +146,22 @@ public class MenuPanel {
     difficultyOptions.add(numArrowsComboBox);
 
     textGameType = new JRadioButton("TEXT game", false);
+    textGameType.setHorizontalAlignment(JRadioButton.RIGHT);
     guiGameType = new JRadioButton("GUI game", true);
+
+    //Group the radio buttons.
+    ButtonGroup groupGameType = new ButtonGroup();
+    groupGameType.add(textGameType);
+    groupGameType.add(guiGameType);
 
     difficultyOptions.add(textGameType);
     difficultyOptions.add(guiGameType);
 
-    frame.getContentPane().add(difficultyOptions);
+    mainPanel.add(difficultyOptions);
 
     JLabel commandsLabel = new JLabel("How to play: ", SwingConstants.CENTER);
     commandsLabel.setFont(new Font("Serif", Font.BOLD, 14));
-    frame.getContentPane().add(commandsLabel);
+    mainPanel.add(commandsLabel);
 
     JPanel commands = new JPanel();
     commands.setLayout(new GridLayout(4,1));
@@ -151,11 +178,11 @@ public class MenuPanel {
     JLabel shotText = new JLabel("Press \"ENTER\" to shoot", SwingConstants.CENTER);
     commands.add(shotText);
 
-    frame.getContentPane().add(commands);
+    mainPanel.add(commands);
 
     startGameBtn = new JButton("Start Game");
     startGameBtn.setPreferredSize(new Dimension(40, 20));
-    frame.getContentPane().add(startGameBtn);
+    mainPanel.add(startGameBtn);
   }
 
   public void show() {
@@ -170,7 +197,54 @@ public class MenuPanel {
     return this.startGameBtn;
   }
 
-  public int getNumArrows() {
-    return this.numArrowsComboBox.getSelectedIndex();
+  public int getNumRows() {
+    int idx = this.numRowsComboBox.getSelectedIndex();
+    return Parameters.NUM_ROWS_ARR[idx];
   }
+
+  public int getNumCols() {
+    int idx = this.numColsComboBox.getSelectedIndex();
+    return Parameters.NUM_COLS_ARR[idx];
+  }
+
+  public boolean isNonWrappingMaze() {
+    return this.nonWrappingMazeRbtn.isSelected();
+  }
+
+  public boolean isWrappingMaze() {
+    return this.wrappingMazeRbtn.isSelected();
+  }
+
+  public boolean isNewMaze() {
+    return this.newMazeRbtn.isSelected();
+  }
+
+  public boolean isSameMaze() {
+    return this.seededMazeRbtn.isSelected();
+  }
+
+  public boolean isTextGame() {
+    return this.textGameType.isSelected();
+  }
+
+  public boolean isGuiGame() {
+    return this.guiGameType.isSelected();
+  }
+
+  public int getNumPits() {
+    int idx = this.numPitsComboBox.getSelectedIndex();
+    return Parameters.NUM_ARROWS_ARR[idx];
+  }
+
+  public int getNumBats() {
+    int idx = this.numSuperBatsComboBox.getSelectedIndex();
+    return Parameters.NUM_SUPERBATS_ARR[idx];
+  }
+
+  public int getNumArrows() {
+    int idx = this.numArrowsComboBox.getSelectedIndex();
+    return Parameters.NUM_ARROWS_ARR[idx];
+  }
+
+
 }

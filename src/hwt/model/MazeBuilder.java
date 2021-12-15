@@ -3,19 +3,24 @@ package hwt.model;
 public class MazeBuilder {
   private final int numRows;
   private final int numCols;
-  private final String mazeType;
+  private final boolean isNonWrappingMaze;
+  private final boolean isWrappingMaze;
   private int numPits;
   private int numBats;
+  private boolean isSeed;
 
-  public MazeBuilder(int numRows, int numCols, String mazeType) throws IllegalArgumentException{
+  public MazeBuilder(int numRows, int numCols, boolean isNonWrappingMaze,
+      boolean isWrappingMaze, boolean isSeed) throws IllegalArgumentException{
     if (numRows <= 0 || numCols <= 0){
       throw new IllegalArgumentException("Number of rows or columns cannot be negative or 0");
     }
-    this.mazeType = mazeType;
+    this.isNonWrappingMaze = isNonWrappingMaze;
+    this.isWrappingMaze = isWrappingMaze;
     this.numRows = numRows;
     this.numCols = numCols;
     this.numPits = 2;
     this.numBats = 4;
+    this.isSeed = isSeed;
   }
 
   public MazeBuilder specifyPitsNumber(int pitNum){
@@ -31,11 +36,11 @@ public class MazeBuilder {
 
   public PerfectMaze build() throws IllegalArgumentException{
     PerfectMaze maze;
-    if (this.mazeType.equals("non-wrapping")){
-      maze = new RoomMaze(this.numRows, this.numCols, this.numPits, this.numBats);
+    if (isNonWrappingMaze){
+      maze = new RoomMaze(this.numRows, this.numCols, this.numPits, this.numBats, this.isSeed);
     }
-    else if (this.mazeType.equals("wrapping")){
-      maze = new WrappingMaze(this.numRows, this.numCols, this.numPits, this.numBats);
+    else if (isWrappingMaze){
+      maze = new WrappingMaze(this.numRows, this.numCols, this.numPits, this.numBats, this.isSeed);
     }
     else {
       throw new IllegalArgumentException("Illegal type - must be either wrapping or non-wrapping");

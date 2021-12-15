@@ -9,8 +9,8 @@ import java.util.Random;
  */
 public class RoomMaze extends PerfectMaze {
 
-  public RoomMaze(int numRows, int numCols, int numPits, int numBats) {
-    super(numRows, numCols, numPits, numBats);
+  public RoomMaze(int numRows, int numCols, int numPits, int numBats, boolean isSeed) {
+    super(numRows, numCols, numPits, numBats, isSeed);
     removeSomeAdditionalWallsFrom(remainingInnerWalls);
     determineRoomType();
     setCaveType();

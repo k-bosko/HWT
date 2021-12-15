@@ -15,10 +15,6 @@ public class Parameters {
   //controller
   public static final int TIMER_PERIOD = 150;
   public static final Pattern PATTERN_DIGITS = Pattern.compile("[^\\d]");
-  //driver
-  public static final int NUM_ARROWS = 2;
-  public static final int NUM_ROWS = 4;
-  public static final int NUM_COLS = 6;
 
   public static final Integer NUM_ROWS_ARR[] = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
   public static final Integer NUM_COLS_ARR[] = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};

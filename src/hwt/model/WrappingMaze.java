@@ -6,8 +6,8 @@ package hwt.model;
  */
 public class WrappingMaze extends PerfectMaze {
 
-  public WrappingMaze(int numRows, int numCols, int numPits, int numBats) {
-    super(numRows, numCols, numPits, numBats);
+  public WrappingMaze(int numRows, int numCols, int numPits, int numBats, boolean isSeed) {
+    super(numRows, numCols, numPits, numBats, isSeed);
     removeSomeAdditionalWallsFrom(remainingInnerWalls);
     removeSomeAdditionalWallsFrom(wrappingWalls);
     determineRoomType();
