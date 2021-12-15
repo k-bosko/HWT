@@ -4,6 +4,7 @@ import hwt.Parameters;
 import hwt.model.Room;
 import input.GameInput;
 import input.KeyBoardHandler;
+import input.MouseHandler;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,23 +13,21 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.util.List;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+
 
 public class SwingView implements View {
   private JFrame frame;
   private SwingPanel panel;
 
-  public SwingView(GameInput input){
+  public SwingView(GameInput input, MouseHandler inputMouse){
     frame = new JFrame("Hunt the Wumpus");
     frame.setSize(Parameters.WINDOW_WIDTH, Parameters.WINDOW_HEIGHT);
     frame.setLayout(new GridLayout(1, 1));
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //    frame.setResizable(false);
 
-    panel = new SwingPanel((KeyBoardHandler) input);
+    panel = new SwingPanel((KeyBoardHandler) input, inputMouse);
     panel.setPreferredSize(new Dimension(Parameters.WINDOW_WIDTH, Parameters.WINDOW_HEIGHT));
 
     JScrollPane scrollPane = new JScrollPane(panel);

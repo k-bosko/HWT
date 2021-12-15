@@ -1,20 +1,12 @@
 package hwt.view;
 
 import hwt.Parameters;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -23,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 
 public class MenuPanel {
   private JFrame frame;
@@ -44,8 +35,6 @@ public class MenuPanel {
   public MenuPanel(){
     frame = new JFrame();
     frame.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
-//    GridLayout grid = new GridLayout(8, 1);
-//    frame.setLayout(grid);
     frame.setSize(450, 750);
 
     JPanel mainPanel = new JPanel();

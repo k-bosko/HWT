@@ -84,12 +84,6 @@ public class KeyBoardHandler implements KeyListener, GameInput {
   }
 
 
-  //TODO add record file functionality or delete isKeyboard
-  @Override
-  public boolean isKeyboard() {
-    return true;
-  }
-
   @Override
   public void resetMoveDirection(){
     this.moveDirection = null;

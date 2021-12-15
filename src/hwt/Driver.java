@@ -1,7 +1,6 @@
 package hwt;
 
 import hwt.controller.Controller;
-import hwt.model.Maze;
 import hwt.model.MazeBuilder;
 import hwt.model.PerfectMaze;
 import hwt.model.Player;
@@ -11,6 +10,7 @@ import hwt.view.SwingView;
 import hwt.view.View;
 import input.GameInput;
 import input.KeyBoardHandler;
+import input.MouseHandler;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -29,7 +29,7 @@ public class Driver {
         menu.hide();
         int numRows = menu.getNumRows();
         int numCols = menu.getNumCols();
-        System.out.println("num rows - " + numRows + " num cols - " + numCols);
+
         boolean isWrappingMaze = menu.isWrappingMaze();
         boolean isNonWrapping = menu.isNonWrappingMaze();
         int numPits = menu.getNumPits();
@@ -48,10 +48,11 @@ public class Driver {
 
         //switch between GUI and TEXT game modes
         if (menu.isGuiGame()){
-          GameInput input = new KeyBoardHandler();
-          View view = new SwingView(input);
+          GameInput inputKeyboard = new KeyBoardHandler();
+          MouseHandler inputMouse = new MouseHandler();
+          View view = new SwingView(inputKeyboard, inputMouse);
 
-          Controller c = new Controller(maze, player, view, input);
+          Controller c = new Controller(maze, player, view, inputKeyboard, inputMouse);
           c.start(GameType.GUI);
         }
         else if (menu.isTextGame()) {

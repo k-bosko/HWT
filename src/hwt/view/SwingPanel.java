@@ -1,9 +1,11 @@
 package hwt.view;
 
+import input.Coordinates;
 import hwt.Parameters;
 import hwt.model.Direction;
 import hwt.model.Room;
 import input.KeyBoardHandler;
+import input.MouseHandler;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -21,25 +23,6 @@ import javax.swing.JPanel;
 
 
 public class SwingPanel extends JPanel {
-
-  private class Coordinates{
-    private int x;
-    private int y;
-
-    public Coordinates(int x, int y) {
-      this.x = x;
-      this.y = y;
-    }
-
-    public int getX() {
-      return x;
-    }
-
-    public int getY() {
-      return y;
-    }
-  }
-
 
   private BufferedImage roombase_1Img;
   private BufferedImage roombase_3Img;
@@ -68,7 +51,7 @@ public class SwingPanel extends JPanel {
   //initialized -> need to avoid calling paintComponent on uninitialized data (-> null pointer exception)
   // bc we don't transfer data we need in constructor but with paint call
 
-  public SwingPanel(KeyBoardHandler input){
+  public SwingPanel(KeyBoardHandler input, MouseHandler inputMouse){
     //load images
     try {
       this.roombase_1Img = ImageIO.read(new File("./img/roombase-1.png"));
@@ -87,6 +70,8 @@ public class SwingPanel extends JPanel {
     } catch (IOException e) {
       System.out.println("File doesn't exist");
     }
+    //register mouse handler
+    addMouseListener(inputMouse);
 
     // register the keyboard handler
     addKeyListener(input);
@@ -129,10 +114,10 @@ public class SwingPanel extends JPanel {
       int numDoors = currentRoom.getNumDoors();
       BufferedImage img = getImage(numDoors, directions);
       int degrees = getRotationAngle(directions);
-      Coordinates coord = getCoordinates(currentRoom, degrees);
+      Coordinates coordCurrentRoom = getCoordinates(currentRoom, degrees);
 
       AffineTransform t = new AffineTransform();
-      t.translate(coord.getX(), coord.getY());
+      t.translate(coordCurrentRoom.getX(), coordCurrentRoom.getY());
       t.rotate(Math.toRadians(degrees));
       g2d.drawImage(img, t, this);
     }

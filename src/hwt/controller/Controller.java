@@ -9,7 +9,9 @@ import hwt.model.Direction;
 import hwt.model.Room;
 import hwt.view.DialogBox;
 import hwt.view.View;
+import input.Coordinates;
 import input.GameInput;
+import input.MouseHandler;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -23,7 +25,8 @@ public class Controller implements ActionListener {
   private final PerfectMaze maze;
   private final Player player;
   private View view = null;
-  private GameInput input = null;
+  private GameInput inputKeyboard = null;
+  private MouseHandler inputMouse = null;
   private Timer timer = null;
   private boolean gameOver = false;
   private boolean firstShootPaint = true;
@@ -41,7 +44,7 @@ public class Controller implements ActionListener {
 
   //constructor for TEXT game mode
   public Controller(PerfectMaze maze, Player player){
-    this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
+    this.maze = maze;
     this.player = player;
     this.caveWithWumpus = maze.getCaveWithWumpus();
     this.cavesWithPits = maze.getCavesWithPits();
@@ -52,8 +55,8 @@ public class Controller implements ActionListener {
   }
 
   //constructor for GUI game mode
-  public Controller(PerfectMaze maze, Player player, View view, GameInput input){
-    this.maze = maze; //TODO check if I need whole maze -> used getStart() and getRoomsWithCaves()
+  public Controller(PerfectMaze maze, Player player, View view, GameInput inputKeyboard, MouseHandler inputMouse){
+    this.maze = maze;
     this.player = player;
     this.caveWithWumpus = maze.getCaveWithWumpus();
     this.cavesWithPits = maze.getCavesWithPits();
@@ -63,7 +66,8 @@ public class Controller implements ActionListener {
     this.cavesNearbyWumpus = maze.getCavesNearbyWumpus();
 
     this.view = view;
-    this.input = input;
+    this.inputKeyboard = inputKeyboard;
+    this.inputMouse = inputMouse;
     this.timer = new Timer(Parameters.TIMER_PERIOD /* 60 fps */, this);
   }
 
@@ -118,10 +122,20 @@ public class Controller implements ActionListener {
 
     Room beforeLoc = player.getLocation();
     beforeLoc.setVisited(true);
-    Direction moveDirection = input.getMoveDirection();
+
+    Direction moveDirection;
+    Coordinates inputMouseCoords =  this.inputMouse.getMouseInputCoords();
+    if (inputMouseCoords != null){
+      moveDirection = inputMouseCoords.getDirectionFromMouseClick(beforeLoc);
+    }
+    else {
+      moveDirection = inputKeyboard.getMoveDirection();
+    }
 
     //need to reset direction to null because we use Timer, otherwise will move constantly in 1 direction
-    input.resetMoveDirection();
+    inputKeyboard.resetMoveDirection();
+    inputMouse.resetMouseInputCoords();
+
     player.moveByRooms(beforeLoc, moveDirection);
     Room afterLoc = player.getLocation();
     //bc we use Timer, which calls actionPerformed every PERIOD, we don't want to repaint every period
@@ -133,8 +147,8 @@ public class Controller implements ActionListener {
       //needs to come last in case superbats worked
       view.repaintPlayer(player.getLocation());
     }
-    boolean shoot = input.getShootStatus();
-    boolean shot = input.isShot();
+    boolean shoot = inputKeyboard.getShootStatus();
+    boolean shot = inputKeyboard.isShot();
     //user pressed "s" to enter shoot mode
     if (shoot) {
       //target appears in location where player is
@@ -144,9 +158,9 @@ public class Controller implements ActionListener {
         firstShootPaint = false;
         //target moves independent of player location
       } else {
-        Direction shootDir = input.getShootDirection();
+        Direction shootDir = inputKeyboard.getShootDirection();
         //need to reset shoot direction, otherwise will be moving in one direction all the time
-        input.resetShootDirection();
+        inputKeyboard.resetShootDirection();
         int adjacentRoomId = shootingTarget.findAdjacentRoomId(shootDir, maze.getNumRows(),
             maze.getNumCols());
         // findAdjacentRoomId() returns sentinel value - Integer.MIN_VALUE - when no Direction specified
@@ -179,7 +193,7 @@ public class Controller implements ActionListener {
       if (targetCave != null){
         view.paintAfterShooting(targetCave); //reveals target cave after shooting
       }
-      input.resetShooting();
+      inputKeyboard.resetShooting();
       firstShootPaint = true;
     }
     //user pressed ESC to exit shooting mode without making a shot
