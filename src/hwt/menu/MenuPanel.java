@@ -1,4 +1,4 @@
-package hwt.view;
+package hwt.menu;
 
 import hwt.Parameters;
 import java.awt.Dimension;
@@ -16,9 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
-public class MenuPanel {
+public class MenuPanel implements Menu {
   private final JFrame frame;
   private final JButton startGameBtn;
+  private final JButton restartGameBtn;
   private final JComboBox<Integer> numRowsComboBox;
   private final JComboBox<Integer> numColsComboBox;
   private final JRadioButton wrappingMazeRbtn;
@@ -170,9 +171,18 @@ public class MenuPanel {
 
     mainPanel.add(commands);
 
+    JPanel buttons = new JPanel();
+    buttons.setLayout(new GridLayout(1, 2));
+
     startGameBtn = new JButton("Start Game");
     startGameBtn.setPreferredSize(new Dimension(40, 20));
-    mainPanel.add(startGameBtn);
+
+    restartGameBtn = new JButton("Restart Game");
+    restartGameBtn.setPreferredSize(new Dimension(40, 20));
+
+    buttons.add(startGameBtn);
+    buttons.add(restartGameBtn);
+    mainPanel.add(buttons);
   }
 
   public void show() {
@@ -185,6 +195,9 @@ public class MenuPanel {
 
   public JButton getStartGameBtn() {
     return this.startGameBtn;
+  }
+  public JButton getRestartGameBtn() {
+    return this.restartGameBtn;
   }
 
   public int getNumRows() {
