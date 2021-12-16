@@ -105,7 +105,6 @@ public class Controller implements ActionListener {
       printOptions(currentCave);
       shootOrMove(currentCave);
     }
-//    System.exit(0);
   }
   public void startGUI() {
 
@@ -119,13 +118,15 @@ public class Controller implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent e) {
+    boolean shoot = inputKeyboard.getShootStatus();
+    boolean shot = inputKeyboard.isShot();
 
     Room beforeLoc = player.getLocation();
     beforeLoc.setVisited(true);
 
     Direction moveDirection;
     Coordinates inputMouseCoords =  this.inputMouse.getMouseInputCoords();
-    if (inputMouseCoords != null){
+    if (!shoot && inputMouseCoords != null){
       moveDirection = inputMouseCoords.getDirectionFromMouseClick(beforeLoc);
     }
     else {
@@ -147,8 +148,7 @@ public class Controller implements ActionListener {
       //needs to come last in case superbats worked
       view.repaintPlayer(player.getLocation());
     }
-    boolean shoot = inputKeyboard.getShootStatus();
-    boolean shot = inputKeyboard.isShot();
+
     //user pressed "s" to enter shoot mode
     if (shoot) {
       //target appears in location where player is

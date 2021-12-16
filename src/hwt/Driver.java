@@ -18,7 +18,7 @@ public class Driver {
 
   private static MazeBuilder mazeBuilder;
 
-  public static void main(String[] args) throws ArrayIndexOutOfBoundsException{
+  public static void main(String[] args) throws ArrayIndexOutOfBoundsException {
 
     MenuPanel menu = new MenuPanel();
     menu.show();
@@ -47,19 +47,18 @@ public class Driver {
         Player player = new Player(startCave, menu.getNumArrows());
 
         //switch between GUI and TEXT game modes
-        if (menu.isGuiGame()){
+        if (menu.isGuiGame()) {
           GameInput inputKeyboard = new KeyBoardHandler();
           MouseHandler inputMouse = new MouseHandler();
-          View view = new SwingView(inputKeyboard, inputMouse);
+          View view = new SwingView(inputKeyboard, inputMouse, maze.getNumRows(),
+              maze.getNumCols());
 
           Controller c = new Controller(maze, player, view, inputKeyboard, inputMouse);
           c.start(GameType.GUI);
-        }
-        else if (menu.isTextGame()) {
+        } else if (menu.isTextGame()) {
           Controller c = new Controller(maze, player);
           c.start(GameType.TEXT);
-        }
-        else {
+        } else {
           //ignore
         }
 
@@ -69,7 +68,12 @@ public class Driver {
       }
     });
 
-
-
+//    menu.getRestartBtn().addActionListener(new ActionListener() {
+//
+//      @Override
+//      public void actionPerformed(ActionEvent e) {
+//
+//      }
+//    });
   }
 }

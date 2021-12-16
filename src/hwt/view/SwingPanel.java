@@ -16,11 +16,10 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-
-//need a panel object upon which to draw
-//Graphics object = pen
-//need to override paintComponent method
-
+/**
+ * SwingPanel creates a customized panel that loads all the images and paints all components
+ * registers MouseListener and KeyListener
+ */
 
 public class SwingPanel extends JPanel {
 
@@ -196,27 +195,34 @@ public class SwingPanel extends JPanel {
     }
   }
 
+  /**
+   * getRotationAngle() - helper function to calculate the rotational angle for a room image
+   *
+   * @param directions
+   * @return
+   */
   private int getRotationAngle(List<Direction> directions){
     int numDoors = directions.size();
     if (numDoors == 2){
-      // original === transform into ||
+      // original Tunnel image with East West doors -> North South
       if (directions.contains(Direction.NORTH) && directions.contains(Direction.SOUTH)){
         return 90;
       }
-      // original South East -> West South
+      // original crooked Tunnel image with South East doors -> West South
       if (directions.contains(Direction.WEST) && directions.contains(Direction.SOUTH)){
         return 90;
       }
-      // original South East -> West North
+      // original crooked Tunnel image with South East doors -> West North
       if (directions.contains(Direction.WEST) && directions.contains(Direction.NORTH)){
         return 180;
       }
-      // original South East -> East North
+      // original crooked Tunnel image with South East doors -> East North
       if (directions.contains(Direction.EAST) && directions.contains(Direction.NORTH)){
         return 270;
       }
     }
-    if (numDoors == 1 ){
+    //rotate roombase
+    if ( numDoors == 1 ){
       if (directions.contains(Direction.SOUTH)) {
         return 90;
       }
@@ -227,7 +233,7 @@ public class SwingPanel extends JPanel {
         return 270;
       }
     }
-    if (numDoors == 3 ){
+    if ( numDoors == 3 ){
       if (directions.contains(Direction.SOUTH) && directions.contains(Direction.WEST)
           && directions.contains(Direction.NORTH)) {
         return 90;
@@ -276,7 +282,7 @@ public class SwingPanel extends JPanel {
 
   public void paintAfterShooting(Room revealRoom){
     this.shoot = false;
-    revealRoom.setVisited(true); //TODO maybe reveal a room
+    revealRoom.setVisited(true);
     repaint();
   }
 

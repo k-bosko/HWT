@@ -17,20 +17,21 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
 public class MenuPanel {
-  private JFrame frame;
-  private JButton startGameBtn;
-  private JComboBox numRowsComboBox;
-  private JComboBox numColsComboBox;
+  private final JFrame frame;
+  private final JButton startGameBtn;
+  private final JComboBox<Integer> numRowsComboBox;
+  private final JComboBox<Integer> numColsComboBox;
+  private final JRadioButton wrappingMazeRbtn;
+  private final JRadioButton nonWrappingMazeRbtn;
+  private final JRadioButton newMazeRbtn;
+  private final JRadioButton seededMazeRbtn;
 
-  private JComboBox numArrowsComboBox;
-  private JComboBox numSuperBatsComboBox;
-  private JComboBox numPitsComboBox;
-  private JRadioButton wrappingMazeRbtn;
-  private JRadioButton nonWrappingMazeRbtn;
-  private JRadioButton textGameType;
-  private JRadioButton guiGameType;
-  private JRadioButton newMazeRbtn;
-  private JRadioButton seededMazeRbtn;
+  private final JComboBox<Integer> numArrowsComboBox;
+  private final JComboBox<Integer> numSuperBatsComboBox;
+  private final JComboBox<Integer> numPitsComboBox;
+  private final JRadioButton textGameType;
+  private final JRadioButton guiGameType;
+
 
   public MenuPanel(){
     frame = new JFrame();
@@ -155,7 +156,7 @@ public class MenuPanel {
     JPanel commands = new JPanel();
     commands.setLayout(new GridLayout(4,1));
 
-    JLabel arrowsText = new JLabel("Use keyboard arrows for navigation", SwingConstants.CENTER);
+    JLabel arrowsText = new JLabel("Use keyboard arrows or mouse click for navigation", SwingConstants.CENTER);
     commands.add(arrowsText);
 
     JLabel shootText = new JLabel("Press \"s\" to enter the shoot mode", SwingConstants.CENTER);
