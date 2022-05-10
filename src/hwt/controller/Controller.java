@@ -7,11 +7,12 @@ import hwt.model.PerfectMaze;
 import hwt.model.Player;
 import hwt.model.Direction;
 import hwt.model.Room;
+import hwt.model.RoomType;
 import hwt.view.DialogBox;
 import hwt.view.View;
-import input.Coordinates;
-import input.GameInput;
-import input.MouseHandler;
+import hwt.input.Coordinates;
+import hwt.input.GameInput;
+import hwt.input.MouseHandler;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -151,35 +152,41 @@ public class Controller implements ActionListener {
 
     //user pressed "s" to enter shoot mode
     if (shoot) {
-      //target appears in location where player is
-      if (firstShootPaint) {
-        shootingTarget = player.getLocation();
-        view.paintTarget(shootingTarget);
-        firstShootPaint = false;
-        //target moves independent of player location
+      Room currentRoom = player.getLocation();
+      if (currentRoom.getType() == RoomType.TUNNEL){
+        printMessage("Can't shoot from a tunnel, only from caves", "");
+        inputKeyboard.resetShooting();
       } else {
-        Direction shootDir = inputKeyboard.getShootDirection();
-        //need to reset shoot direction, otherwise will be moving in one direction all the time
-        inputKeyboard.resetShootDirection();
-        int adjacentRoomId = shootingTarget.findAdjacentRoomId(shootDir, maze.getNumRows(),
-            maze.getNumCols());
-        // findAdjacentRoomId() returns sentinel value - Integer.MIN_VALUE - when no Direction specified
-        if (adjacentRoomId != Integer.MIN_VALUE) {
-          Room newTargetRoom = rooms.get(adjacentRoomId);
-          //make sure that target is moving only horizontally or vertically
-          int playerRowId = player.getLocation().getRowId();
-          int playerColId = player.getLocation().getColId();
-          if ((newTargetRoom.getRowId() == playerRowId &&
-              (shootDir == Direction.WEST || shootDir == Direction.EAST)) ||
-              (newTargetRoom.getColId() == playerColId &&
-              (shootDir == Direction.NORTH || shootDir == Direction.SOUTH)) ){
-            view.paintTarget(newTargetRoom);
-            shootingTarget = newTargetRoom;
-            shotDirection = shootDir;
-            //take the larger number - one of them will be 0
-            // newRoom is either on the same rowId as player or same colId as player
-            numCavesShot = Math.max(Math.abs(newTargetRoom.getRowId()-playerRowId),
-                Math.abs(newTargetRoom.getColId()-playerColId));
+        //target appears in location where player is
+        if (firstShootPaint) {
+          shootingTarget = currentRoom;
+          view.paintTarget(shootingTarget);
+          firstShootPaint = false;
+          //target moves independent of player location
+        } else {
+          Direction shootDir = inputKeyboard.getShootDirection();
+          //need to reset shoot direction, otherwise will be moving in one direction all the time
+          inputKeyboard.resetShootDirection();
+          int adjacentRoomId = shootingTarget.findAdjacentRoomId(shootDir, maze.getNumRows(),
+              maze.getNumCols());
+          // findAdjacentRoomId() returns sentinel value - Integer.MIN_VALUE - when no Direction specified
+          if (adjacentRoomId != Integer.MIN_VALUE) {
+            Room newTargetRoom = rooms.get(adjacentRoomId);
+            //make sure that target is moving only horizontally or vertically
+            int playerRowId = player.getLocation().getRowId();
+            int playerColId = player.getLocation().getColId();
+            if ((newTargetRoom.getRowId() == playerRowId &&
+                (shootDir == Direction.WEST || shootDir == Direction.EAST)) ||
+                (newTargetRoom.getColId() == playerColId &&
+                    (shootDir == Direction.NORTH || shootDir == Direction.SOUTH))) {
+              view.paintTarget(newTargetRoom);
+              shootingTarget = newTargetRoom;
+              shotDirection = shootDir;
+              //take the larger number - one of them will be 0
+              // newRoom is either on the same rowId as player or same colId as player
+              numCavesShot = Math.max(Math.abs(newTargetRoom.getRowId() - playerRowId),
+                  Math.abs(newTargetRoom.getColId() - playerColId));
+            }
           }
         }
       }
@@ -428,6 +435,7 @@ public class Controller implements ActionListener {
     if (currentCave.getCaveType().contains(CaveType.PIT) && !superbatsWorked){
       String messagePit = "Oh no! You fell into the bottomless pit... Better luck next time";
       printMessage(messagePit, "Game Over");
+      currentCave.setVisited(true);
       gameOver = true;
     }
 
@@ -435,6 +443,7 @@ public class Controller implements ActionListener {
     if (currentCave.getCaveType().contains(CaveType.WUMPUS) && !superbatsWorked){
       String messageWumpus = "Chomp chomp chomp... Thank you for feeding the wumpus! Better luck next time";
       printMessage(messageWumpus, "Game Over");
+      currentCave.setVisited(true);
       gameOver = true;
     }
   }

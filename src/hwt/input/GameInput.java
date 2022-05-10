@@ -1,4 +1,4 @@
-package input;
+package hwt.input;
 
 import hwt.model.Direction;
 

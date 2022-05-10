@@ -1,11 +1,11 @@
 package hwt.view;
 
-import input.Coordinates;
+import hwt.input.Coordinates;
 import hwt.Parameters;
 import hwt.model.Direction;
 import hwt.model.Room;
-import input.KeyBoardHandler;
-import input.MouseHandler;
+import hwt.input.KeyBoardHandler;
+import hwt.input.MouseHandler;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -106,9 +106,9 @@ public class SwingPanel extends JPanel {
     //show maze room by room
     for (int i = 0; i < this.rooms.size(); i++){
       Room currentRoom = rooms.get(i);
-//      if ( !currentRoom.isVisited() ) {
-//        continue;
-//      }
+      if ( !currentRoom.isVisited() ) {
+        continue;
+      }
       List<Direction> directions = currentRoom.getDirections();
       int numDoors = currentRoom.getNumDoors();
       BufferedImage img = getImage(numDoors, directions);
@@ -124,42 +124,42 @@ public class SwingPanel extends JPanel {
 
     for (int i = 0; i < this.cavesWithPits.size(); i++){
       Room caveWithPit = this.cavesWithPits.get(i);
-//      if ( caveWithPit.isVisited() ) {
+      if ( caveWithPit.isVisited() ) {
         Coordinates coordPit = getCoordinates(caveWithPit, 0);
         g2d.drawImage(this.pitImg, coordPit.getX(), coordPit.getY(), this);
-//      }
+      }
     }
 
-//    if ( caveWithWumpus.isVisited() ) {
+    if ( caveWithWumpus.isVisited() ) {
       Coordinates coordWumpus = getCoordinates(this.caveWithWumpus, 0);
       int wumpusShift = (Parameters.ROOM_SIZE - Parameters.WUMPUS_SIZE) / 2;
       g2d.drawImage(this.wumpusImg, coordWumpus.getX() + wumpusShift,
           coordWumpus.getY() + wumpusShift, this);
-//    }
+    }
 
    for (Room caveNearbyWumpus: this.cavesNearbyWumpus){
-//     if ( caveNearbyWumpus.isVisited() ) {
+     if ( caveNearbyWumpus.isVisited() ) {
        Coordinates coordCaveNearbyWumpus = getCoordinates(caveNearbyWumpus, 0);
        g2d.drawImage(this.wumpusNearbyImg, coordCaveNearbyWumpus.getX(),
            coordCaveNearbyWumpus.getY(), this);
-//     }
+     }
     }
 
    for (Room caveNearbyPit: this.cavesNearbyPits){
-//     if ( caveNearbyPit.isVisited() ) {
+     if ( caveNearbyPit.isVisited() ) {
        Coordinates coordCaveNearbyPit = getCoordinates(caveNearbyPit, 0);
        g2d.drawImage(this.pitNearbyImg, coordCaveNearbyPit.getX(), coordCaveNearbyPit.getY(), this);
-//     }
+     }
    }
 
     for (int i = 0; i < this.cavesWithBats.size(); i++){
       Room caveWithBats = this.cavesWithBats.get(i);
-//      if ( caveWithBats.isVisited() ){
+      if ( caveWithBats.isVisited() ){
         Coordinates coordBats = getCoordinates(caveWithBats, 0);
         int batsShift = (Parameters.ROOM_SIZE - Parameters.BATS_SIZE)/2;
         g2d.drawImage(this.superbatsImg, coordBats.getX() + batsShift,
             coordBats.getY() + batsShift, this);
-//      }
+      }
     }
 
     Coordinates coordPlayer = getCoordinates(this.playerLoc, 0);

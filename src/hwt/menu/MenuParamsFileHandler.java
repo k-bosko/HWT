@@ -60,7 +60,7 @@ public class MenuParamsFileHandler implements Menu {
         break;
     }
     this.isSeed = true;
-    this.numArrows = Integer.parseInt(vals[5]);
+    this.numArrows = Integer.parseInt(vals[6]);
   }
 
 

@@ -2,9 +2,9 @@ package hwt.view;
 
 import hwt.Parameters;
 import hwt.model.Room;
-import input.GameInput;
-import input.KeyBoardHandler;
-import input.MouseHandler;
+import hwt.input.GameInput;
+import hwt.input.KeyBoardHandler;
+import hwt.input.MouseHandler;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.List;

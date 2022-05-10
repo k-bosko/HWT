@@ -1,11 +1,10 @@
-package input;
+package hwt.input;
 
 import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_LEFT;
 import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_UP;
 
-import hwt.Parameters;
 import hwt.model.Direction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -95,5 +94,5 @@ public class KeyBoardHandler implements KeyListener, GameInput {
   }
 
   @Override
-  public void resetShooting() {this.shot = false;}
+  public void resetShooting() {this.shot = false; this.shoot = false;}
 }
